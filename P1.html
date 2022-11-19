@@ -12,9 +12,18 @@
       #P2 {color:#d6d610}
       #P3 {color:purple}
       #PT {color: #0b95d3}
-      #PTd3 { font-size: .6em}
-      #PTd2 { font-size: .6em}
-      #PTd1 { font-size: .6em}
+        #PTd3 { font-size: .6em}
+        #PTd2 { font-size: .6em}
+        #PTd1 { font-size: .6em}
+        #P1d3 { font-size: .6em}
+        #P1d2 { font-size: .6em}
+        #P1d1 { font-size: .6em}
+        #P2d3 { font-size: .6em}
+        #P2d2 { font-size: .6em}
+        #P2d1 { font-size: .6em}
+        #P3d3 { font-size: .6em}
+        #P3d2 { font-size: .6em}
+        #P3d1 { font-size: .6em}
   </style>
 
 </head>
@@ -184,6 +193,18 @@ async function meter(i){
     document.getElementById('PTd3').innerHTML             = deltas[0];
     document.getElementById('PTd2').innerHTML             = deltas[1];
     document.getElementById('PTd1').innerHTML             = deltas[2];
+    let deltal1 = delta_calc(datal1);
+    document.getElementById('P1d3').innerHTML             = deltal1[0];
+    document.getElementById('P1d2').innerHTML             = deltal1[1];
+    document.getElementById('P1d1').innerHTML             = deltal1[2];
+    let deltal2 = delta_calc(datal2);
+    document.getElementById('P2d3').innerHTML             = deltal2[0];
+    document.getElementById('P2d2').innerHTML             = deltal2[1];
+    document.getElementById('P2d1').innerHTML             = deltal2[2];
+    let deltal3 = delta_calc(datal3);
+    document.getElementById('P3d3').innerHTML             = deltal3[0];
+    document.getElementById('P3d2').innerHTML             = deltal3[1];
+    document.getElementById('P3d1').innerHTML             = deltal3[2];
 
     // ctx.clear();
     //  ctx.clearRect(0, 0, window.width, window.height);
@@ -250,11 +271,11 @@ async function waitInterval(callback, ms) {
 function delta_calc(_array){
     let delta = [];
     if(_array.length > 3){
-        delta.push(_array[_array.length-4] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-4])}else{delta.push(0)}
     if(_array.length > 2){
-        delta.push(_array[_array.length-3] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-3])}else{delta.push(0)}
     if(_array.length > 1){
-        delta.push(_array[_array.length-2] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-2])}else{delta.push(0)}
     
     return delta
 }
@@ -560,6 +581,7 @@ function $(object){
 
 
 
+
 </script>
 
 <div>
@@ -578,9 +600,10 @@ function $(object){
 <br><h0>Meter model:<span id=MM></span></h0>
 <br><h0>SMR version:<span id=SV></span></h0>
 
-<br><h1>Fase 1 (W):<span id=P1>0</span></h1>
-<h1>Fase 2 (W):<span id=P2>0</span></h1>
-<h1>Fase 3 (W):<span id=P3>0</span></h1>
+<br>
+<h1>Fase 1 (W):<span id=P1>0</span> <span id=P1d3>0</span> <span id=P1d2>0</span> <span id=P1d1>0</span></h1>
+<h1>Fase 2 (W):<span id=P2>0</span> <span id=P2d3>0</span> <span id=P2d2>0</span> <span id=P2d1>0</span></h1>
+<h1>Fase 3 (W):<span id=P3>0</span> <span id=P3d3>0</span> <span id=P3d2>0</span> <span id=P3d1>0</span></h1>
 <h1>Totaal (W):<span id=PT>0</span> <span id=PTd3>0</span> <span id=PTd2>0</span> <span id=PTd1>0</span></h1>
 
 <chart>

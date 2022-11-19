@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P1 reader</title><style>#P1{color:#0f0}#P2{color:#d6d610}#P3{color:purple}#PT{color:#0b95d3}#PTd3{font-size:.6em}#PTd2{font-size:.6em}#PTd1{font-size:.6em}</style></head><body><script>// Author: Edwin Glaser
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P1 reader</title><style>#P1{color:#0f0}#P2{color:#d6d610}#P3{color:purple}#PT{color:#0b95d3}#PTd3{font-size:.6em}#PTd2{font-size:.6em}#PTd1{font-size:.6em}#P1d3{font-size:.6em}#P1d2{font-size:.6em}#P1d1{font-size:.6em}#P2d3{font-size:.6em}#P2d2{font-size:.6em}#P2d1{font-size:.6em}#P3d3{font-size:.6em}#P3d2{font-size:.6em}#P3d1{font-size:.6em}</style></head><body><script>// Author: Edwin Glaser
 // --------  Only for private usage -----------
 // Date Nov. 2022
 // HomeWizard P1 
@@ -159,6 +159,18 @@ async function meter(i){
     document.getElementById('PTd3').innerHTML             = deltas[0];
     document.getElementById('PTd2').innerHTML             = deltas[1];
     document.getElementById('PTd1').innerHTML             = deltas[2];
+    let deltal1 = delta_calc(datal1);
+    document.getElementById('P1d3').innerHTML             = deltal1[0];
+    document.getElementById('P1d2').innerHTML             = deltal1[1];
+    document.getElementById('P1d1').innerHTML             = deltal1[2];
+    let deltal2 = delta_calc(datal2);
+    document.getElementById('P2d3').innerHTML             = deltal2[0];
+    document.getElementById('P2d2').innerHTML             = deltal2[1];
+    document.getElementById('P2d1').innerHTML             = deltal2[2];
+    let deltal3 = delta_calc(datal3);
+    document.getElementById('P3d3').innerHTML             = deltal3[0];
+    document.getElementById('P3d2').innerHTML             = deltal3[1];
+    document.getElementById('P3d1').innerHTML             = deltal3[2];
 
     // ctx.clear();
     //  ctx.clearRect(0, 0, window.width, window.height);
@@ -225,11 +237,11 @@ async function waitInterval(callback, ms) {
 function delta_calc(_array){
     let delta = [];
     if(_array.length > 3){
-        delta.push(_array[_array.length-4] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-4])}else{delta.push(0)}
     if(_array.length > 2){
-        delta.push(_array[_array.length-3] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-3])}else{delta.push(0)}
     if(_array.length > 1){
-        delta.push(_array[_array.length-2] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-2])}else{delta.push(0)}
     
     return delta
 }
@@ -531,4 +543,4 @@ function $(object){
     return document.querySelector(object);
 }
 
-//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div><label for="IP">IP:</label> <input type="text" id="IP" name="IP" required minlength="7" maxlength="15" size="15"> <input id="Scan" type="button" value="Start" onclick="run()"></div><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><chart><canvas le width="700px" height="400px"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#03a9f4"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><h0>Gas Time (hh:mm:ss/dd-mm-yy) :<span id="GTS">0</span></h0><h1>Gas (m3) :<span id="G0">0</span></h1><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>
+//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div><label for="IP">IP:</label> <input type="text" id="IP" name="IP" required minlength="7" maxlength="15" size="15"> <input id="Scan" type="button" value="Start" onclick="run()"></div><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span> <span id="P1d3">0</span> <span id="P1d2">0</span> <span id="P1d1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span> <span id="P2d3">0</span> <span id="P2d2">0</span> <span id="P2d1">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span> <span id="P3d3">0</span> <span id="P3d2">0</span> <span id="P3d1">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><chart><canvas le width="700px" height="400px"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#03a9f4"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><h0>Gas Time (hh:mm:ss/dd-mm-yy) :<span id="GTS">0</span></h0><h1>Gas (m3) :<span id="G0">0</span></h1><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>

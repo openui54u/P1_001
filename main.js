@@ -159,6 +159,18 @@ async function meter(i){
     document.getElementById('PTd3').innerHTML             = deltas[0];
     document.getElementById('PTd2').innerHTML             = deltas[1];
     document.getElementById('PTd1').innerHTML             = deltas[2];
+    let deltal1 = delta_calc(datal1);
+    document.getElementById('P1d3').innerHTML             = deltal1[0];
+    document.getElementById('P1d2').innerHTML             = deltal1[1];
+    document.getElementById('P1d1').innerHTML             = deltal1[2];
+    let deltal2 = delta_calc(datal2);
+    document.getElementById('P2d3').innerHTML             = deltal2[0];
+    document.getElementById('P2d2').innerHTML             = deltal2[1];
+    document.getElementById('P2d1').innerHTML             = deltal2[2];
+    let deltal3 = delta_calc(datal3);
+    document.getElementById('P3d3').innerHTML             = deltal3[0];
+    document.getElementById('P3d2').innerHTML             = deltal3[1];
+    document.getElementById('P3d1').innerHTML             = deltal3[2];
 
     // ctx.clear();
     //  ctx.clearRect(0, 0, window.width, window.height);
@@ -225,11 +237,11 @@ async function waitInterval(callback, ms) {
 function delta_calc(_array){
     let delta = [];
     if(_array.length > 3){
-        delta.push(_array[_array.length-4] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-4])}else{delta.push(0)}
     if(_array.length > 2){
-        delta.push(_array[_array.length-3] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-3])}else{delta.push(0)}
     if(_array.length > 1){
-        delta.push(_array[_array.length-2] - _array[_array.length-1])}else{delta.push(0)}
+        delta.push(  _array[_array.length-1] - _array[_array.length-2])}else{delta.push(0)}
     
     return delta
 }
