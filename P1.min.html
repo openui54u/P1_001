@@ -41,6 +41,8 @@ let un = 0
 let ys = 0;
 let dataT = [];
 
+const max_seconds = 600;
+
 
 let iteration = 0;
 
@@ -62,6 +64,45 @@ c = document.querySelector("canvas[le]");
  h = c.height;
  w = c.width ;
 ctx = c.getContext('2d');
+
+
+c.onmousemove = function(e){
+
+    $('draw-canvas-data-set').style.opacity = "0"
+
+    for(let data of dataT){
+        for (const [key, value] of Object.entries(data)) {
+            let dataG = value.split(","),
+            lx = e.layerX - 10,
+            ly = e.layerY - c.height + 25,
+            dx = dataG[1],
+            dy = dataG[0];
+            if (range(dx-10,Math.floor(dx)+10).includes(lx)){
+                //  console.log(dx, 'X includes', lx);
+            } 
+            if(range(dy-10,Math.floor(dy)+10).includes(ly)){
+                // console.log(dy, 'Y includes', ly);
+            }
+           
+                if (range(dx-10,Math.floor(dx)+10).includes(lx) && range(dy-10,Math.floor(dy)+10).includes(ly)) {
+                    // console.log(lx,ly,dx,dy, dataG[2]);
+                    // $('draw-canvas-data-set').innerHTML = dataG[2] + ':' + 'dx' + dataG[1] + 'dy' + dataG[0] + 'lx' +lx + 'ly' + ly;
+                    $('draw-canvas-data-set').innerHTML = dataG[3] + ':' + dataG[2]
+                    $('draw-canvas-data-set').style.opacity = "1"
+                    $('draw-canvas-data-set').style.left = e.clientX + "px"
+                    $('draw-canvas-data-set').style.top = e.clientY + "px"
+                }else{ 
+                // if (!range(dx-10,Math.floor(dx)+10).includes(lx) && !range(dy-10,Math.floor(dy)+10).includes(ly)) {
+                    // $('draw-canvas-data-set').style.opacity = "0.3"
+                    // console.log(lx,ly,dx,dy, dataG);
+                }
+                lx = lx -1
+                dx = dx -1
+        }
+    }
+}
+
+
 Init();
 
     document.getElementById('IP').value = '192.168.2.45';
@@ -97,7 +138,7 @@ function drawLine(){
     chart.digram()
     chart.data();
     chart.draw();
-    // chart.pointes();
+    chart.pointes();
     }
 
     return true;
@@ -207,7 +248,7 @@ async function meter(i){
         document.getElementById('AL').innerHTML =  document.getElementById('TL').innerHTML = '';
     }
 
-    return i == 300;
+    return i == max_seconds;
 
     } else {
       alert("HTTP-Error: " + response.status);
@@ -399,7 +440,7 @@ pointes: function() {
     line = 30
     start = 0;//30
     for (data of dataX) {
-        this.points(data, dataX)
+        this.points(data, dataX, 'Tot.')
     }
 
     ctx.fillStyle = "#00FF00" //green
@@ -408,7 +449,7 @@ pointes: function() {
     line = 30
     start = 0; //30
     for (data of datal1) {
-        this.points(data, datal1)
+        this.points(data, datal1, 'l1')
     }
 
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
@@ -417,7 +458,7 @@ pointes: function() {
     line = 30
     start = 0; //30
     for (data of datal2) {
-        this.points(data, datal2)
+        this.points(data, datal2, 'l2')
     }
 
     ctx.fillStyle = "#A020F0" // purple
@@ -426,13 +467,13 @@ pointes: function() {
     line = 30
     start = 0; //30
     for (data of datal3) {
-        this.points(data, datal3)
+        this.points(data, datal3 ,'l3')
     }
     ctx.fillStyle = "#00000F" 
 
     ctx.stroke()
 },
-points: function(d, dX){
+points: function(d, dX, f){
     // max = Math.max(...dX),
      // test = 30;
     // max = 1000; //test
@@ -447,12 +488,11 @@ while (max > d) {
 }
 // chart.circle(30 + y, test)
 chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(30 + y) +","+Math.round(d)})
-x = 30
+dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f})
+x = 0; //30
 y += ys
-
-
 },
+
  data: function() {
     y = 60
     x = 30
@@ -513,27 +553,6 @@ circle: function(x,y) {
 }
 }
 
-c.onmousemove = function(e){
-    for(let data of dataT){
-        for (const [key, value] of Object.entries(data)) {
-            let dataG = value.split(","),
-            lx = e.layerX,
-            ly = e.layerY,
-            dx = dataG[1],
-            dy = dataG[0]
-                if (range(dx-10,Math.floor(dx)+10).includes(lx) && range(dy-10,Math.floor(dy)+10).includes(ly)) {
-                    $('draw-canvas-data-set').innerHTML = dataG[2]
-                    $('draw-canvas-data-set').style.opacity = "1"
-                    $('draw-canvas-data-set').style.left = e.clientX + "px"
-                    $('draw-canvas-data-set').style.top = e.clientY + "px"
-                } if (range(dx-10,Math.floor(dx)+10).includes(lx) && !range(dy-10,Math.floor(dy)+10).includes(ly)) {
-                    $('draw-canvas-data-set').style.opacity = "0"
-                }
-                lx = lx -1
-                dx = dx -1
-        }
-    }
-}
 
 function range(start, end) {
     let range = [...Array(end + 1).keys()].filter(value => end >= value && start <= value );
@@ -543,4 +562,4 @@ function $(object){
     return document.querySelector(object);
 }
 
-//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div><label for="IP">IP:</label> <input type="text" id="IP" name="IP" required minlength="7" maxlength="15" size="15"> <input id="Scan" type="button" value="Start" onclick="run()"></div><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span> <span id="P1d3">0</span> <span id="P1d2">0</span> <span id="P1d1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span> <span id="P2d3">0</span> <span id="P2d2">0</span> <span id="P2d1">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span> <span id="P3d3">0</span> <span id="P3d2">0</span> <span id="P3d1">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><chart><canvas le width="700px" height="400px"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#03a9f4"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><h0>Gas Time (hh:mm:ss/dd-mm-yy) :<span id="GTS">0</span></h0><h1>Gas (m3) :<span id="G0">0</span></h1><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>
+//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div><label for="IP">IP:</label> <input type="text" id="IP" name="IP" required minlength="7" maxlength="15" size="15"> <input id="Scan" type="button" value="Start" onclick="run()"></div><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span> <span id="P1d3">0</span> <span id="P1d2">0</span> <span id="P1d1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span> <span id="P2d3">0</span> <span id="P2d2">0</span> <span id="P2d1">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span> <span id="P3d3">0</span> <span id="P3d2">0</span> <span id="P3d1">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><chart><canvas le width="700px" height="400px"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#8d8e8f"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><h0>Gas Time (hh:mm:ss/dd-mm-yy) :<span id="GTS">0</span></h0><h1>Gas (m3) :<span id="G0">0</span></h1><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>
