@@ -495,6 +495,7 @@ chartLine: function() {
 ,
 draw: function() {
     ctx.save()
+
     ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
     ctx.lineWidth = 3
     ctx.beginPath()
@@ -505,11 +506,7 @@ draw: function() {
     start = 0;//30
     // ctx.moveTo(60, h-30);
     for(data of dataX){
-        // max = Math.max(...dataX),
-        // test = 30;
         let A = [ dataX, datal1, datal2, datal3];
-        // let maxArray = A.map(a => Math.max.apply(null, a));
-        // max = Math.max(...maxArray),
         max = getMinMaxUn(A)[1];
         test = 30;
 
@@ -686,12 +683,7 @@ pointes: function() {
     ctx.stroke()
 },
 points: function(d, dX, f){
-    // max = Math.max(...dX),
-     // test = 30;
-    // max = 1000; //test
     let A = [ dataX, datal1, datal2, datal3];
-    // let maxArray = A.map(a => Math.max.apply(null, a));
-    // max = Math.max(...maxArray),
     max = getMinMaxUn(A)[1];
     test = 30;
 
@@ -750,9 +742,6 @@ y += ys
  data: function() {
     y = 60
     x = 30
-    // n = Math.max(...dataX)
-    // n = 1000; //temp
-
     let A = [ dataX, datal1, datal2, datal3];
     let maxArray = A.map(a => Math.max.apply(null, a));
     n = Math.max(...maxArray)
@@ -772,10 +761,6 @@ y += ys
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
             y += ys*10;
         }else
-        // if (dataY.length > 50){
-        //     ctx.fillText(ydata*6, y +6*ys ,h-10); 
-        //     y += ys*6;
-        // }else
         if (dataY.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
             y += ys*5;
@@ -797,6 +782,7 @@ y += ys
     }
     
 },
+
 // dataGas: function() {
 //     y = 60
 //     x = 30
