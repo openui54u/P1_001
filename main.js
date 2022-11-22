@@ -39,10 +39,13 @@ let datal1 = [];
 let datal2 = [];
 let datal3 = [];
 let dataGas = [];
+let dataGasPoint = [];
 let un = 0
 let ys = 0;
 let dataT = [];
 let button_stop = false;
+
+let debug = false;
 
 const max_seconds = 1500;
 let e_start = {};
@@ -369,24 +372,54 @@ async function meter(i){
     if(json.gas_timestamp){
         // YYMMDDhhmmss
    let _stamp = json.gas_timestamp.toString();
-        let _time = 
-        _stamp.substring(6,8) + ':' + _stamp.substring(8,10) + ':' + _stamp.substring(10,12) + '  /  ' +
-        _stamp.substring(4,6) + '-' + _stamp.substring(2,4) + '-' + _stamp.substring(0,2) ;
+        
+       let hh = _stamp.substring(6,8)  ;
+       let mm = _stamp.substring(8,10) ;
+       let ss = _stamp.substring(10,12);
+
+       let YY = _stamp.substring(4,6) ;
+       let MM = _stamp.substring(2,4) ;
+       let DD = _stamp.substring(0,2) ;
     
-        if (dataGas.length != 0){
+        let _time = hh + ':' + mm + ':' + ss;
+        let _date = YY + '-' + MM + '-' + DD;
+            _time = _time + '/' + _date;
+        let _timestamp = Number(ss) + Number(60*mm) + Number(3600*hh);
 
-        if (dataGas[dataGas.length-1][0]  != _time){
-            console.log(_time);
+        if (dataGasPoint.length != 0){
+
+        if (dataGasPoint[dataGasPoint.length-1][2]  != _timestamp || debug == true){
+            
+            console.log(hh,mm,ss,_time,_timestamp);
             // dataGas.push([_time, json.total_gas_m3]) ;
+            _string = _string + _time + ' : ' + json.total_gas_m3;
 
-            _string = _string +_time + ' : ' + json.total_gas_m3 + '<br>';
+            dataGasPoint.push([_time, json.total_gas_m3, _timestamp])
+            
+            if ( dataGasPoint.length > 1){
+                let _deltaGas =  Math.floor( ( dataGasPoint[dataGasPoint.length-1][1]*100 -  dataGasPoint[dataGasPoint.length-2][1]*100 ) *1000 ) / 100;
+                
+                let _min  = (dataGasPoint[dataGasPoint.length-1][2] - dataGasPoint[dataGasPoint.length-2][2]) /60; // temp constant 
+                _string = _string + ' Delta:' + _deltaGas + ' liter/' + Math.floor(_min*10)/10 + 'min. ';
+
+                if (_min != 0){
+                let _usage = Math.round(_deltaGas * 100 / _min) / 100;
+                console.log(dataGasPoint[dataGasPoint.length-1][2], dataGasPoint[dataGasPoint.length-2][2],_usage, _min)
+                _string = _string + 'Flow:' + _usage + ' l/min';
+                }
+
+            }
+            _string = _string + '<br>';
         }  
-        dataGas.push([_time, json.total_gas_m3]) ;
+        dataGas.push([_time, json.total_gas_m3, _timestamp]) ;
+
         }else{
-            dataGas.push([_time, json.total_gas_m3]) 
+            dataGas.push([_time, json.total_gas_m3, _timestamp]) ;
+            dataGasPoint.push([_time, json.total_gas_m3, _timestamp]);
             // _string = Gas[0] + ' : ' + Gas[1] + '<br>';
             _string = _time + ' : ' + json.total_gas_m3 + '<br>';
         }
+
 
         // let _string = '';
         // for (Gas of dataGas){   
