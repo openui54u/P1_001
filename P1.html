@@ -30,7 +30,6 @@
 <body>
 
 <script>
-
 // Author: Edwin Glaser
 // --------  Only for private usage -----------
 // Date Nov. 2022
@@ -183,7 +182,7 @@ window.onload = function() {
               
             if ( ( lx > dx - _delta && lx < dx + _delta  )  && ( ly > dy - _delta && ly < dy + _delta  ) ){
                
-                if ( _ID == 'E'){
+                if ( _ID == 'E' && dataG[3] != 'Gas'){
                   
                         tabE.innerHTML     = dataG[3] + ':' + dataG[2]    // $('draw-canvas-data-set')
                         tabE.style.opacity = "1"                      // $('draw-canvas-data-set') 
@@ -192,7 +191,7 @@ window.onload = function() {
 
 
 
-                    }else if ( _ID == 'G'){
+                    }else if ( _ID == 'G' && dataG[3] == 'Gas'){
 
                         tabG.innerHTML     = dataG[3] + ':' + dataG[2]   //$('draw-canvas-data-setG')
                         tabG.style.opacity = "1"                     //$('draw-canvas-data-setG')
@@ -211,7 +210,7 @@ window.onload = function() {
 }
 
     Init();
-    // document.getElementById('IP').value = '192.168.2.45';
+    document.getElementById('IP').value = '192.168.2.45';
 };
 
 async function wrapper(){
@@ -933,8 +932,6 @@ function $(object){
 }
 
 //  -- - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-
 
 
 
