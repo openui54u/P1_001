@@ -34,6 +34,7 @@ let w = 0;
 let Ctx  = {}; // Electr Canvas 
 let CtxG = {}; // Gas    Canvas
 let dataY = [];
+let dataYG = [];
 let dataX = [];
 let datal1 = [];
 let datal2 = [];
@@ -44,42 +45,46 @@ let un = 0
 let ys = 0;
 let dataT = [];
 let button_stop = false;
+let tabE = {};
+let tabG = {};
 
 let debug = false;
+
+var MMU; // Minimum Maximum Unit
 
 const max_seconds = 1500;
 let e_start = {};
 let e_stop  = {};
 let _string = ''; // Gas string accumulated
+let min = 0,
+    max = 0;
 
 
 let iteration = 0;
 
 function Init(){
 
-    if(e_start && e_start.style){
-       e_start.style.opacity = 1 };
-    if(e_stop && e_stop.style){
-       e_stop.style.opacity = 0 };
+        if(e_start && e_start.style){
+        e_start.style.opacity = 1 };
+        if(e_stop && e_stop.style){
+        e_stop.style.opacity = 0 };
 
-iteration = 0;
-dataY = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-dataX = [0,100];
-un = Math.round((Math.max(...dataX)-Math.min(...dataX))/10)
-un = Math.round(un / 10) * 10;
-// ys = (w-40)/dataY.length; // steps on horizontal axis
-ys = (w-80)/dataY.length; // steps on horizontal axis
-dataT = [];
+        iteration = 0;
+        dataY = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        dataX = [0,100];
+        un = Math.round((Math.max(...dataX)-Math.min(...dataX))/10)
+        ys = (w-80)/dataY.length; // steps on horizontal axis
+        dataT = [];
 
-// Initialise Diagram framwork
-chart.setCtx(Ctx);
-chart.chartLine()
-chart.digram();
+        // Initialise Diagram framwork
+        chart.setCtx(Ctx);
+        chart.chartLine()
+        chart.digram();
 
-// Set Canvas focus to Gas and draw empty diagram
-// chart.setCtx(CtxG);
-// chart.chartLine();
-// chart.digram();
+        // Set Canvas focus to Gas and draw empty diagram
+        chart.setCtx(CtxG);
+        chart.chartLine();
+        chart.digram();
 
 }
 
@@ -95,47 +100,77 @@ window.onload = function() {
         e_stop.style.opacity = 0 };
 
         c   = document.querySelector("canvas[le]");
-        // cg  = document.querySelector("canvas[lg]");
+        cg  = document.querySelector("canvas[lg]");
+
+        tabE = document.querySelector("draw-canvas-data-set");
+        tabG = document.querySelector("draw-canvas-data-setG");
+
         // Electr.
         h   = c.height;
         w   = c.width ;
         // Gas
-        // hg   = cg.height;
-        // wg   = cg.width ;
+        hg   = cg.height;
+        wg   = cg.width ;
+
+        // Canvas Context
         Ctx  = c.getContext('2d');
-        // CtxG = cg.getContext('2d');
+        CtxG = cg.getContext('2d');
 
+        cg.onmousemove = function(e){ 
+            document.getElementById('G').focus();
+            tabE.style.opacity = "0" // $('draw-canvas-data-set')
+            tabG.style.opacity = "0" // $('draw-canvas-data-setG')
+            mouseMove(e) 
+        };
 
-        c.onmousemove = function(e){
+        c.onmousemove  = function(e){ 
+            tabE.style.opacity = "0" // $('draw-canvas-data-set')
+            tabG.style.opacity = "0" // $('draw-canvas-data-setG')
+            document.getElementById('E').focus();
+            mouseMove(e) 
+        };
 
-    $('draw-canvas-data-set').style.opacity = "0"
+    function mouseMove(e){ 
+
+        let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
+        let _tabIndex = e.currentTarget.attributes[4].nodeValue; // 1  2
+
+        //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
 
     for(let data of dataT){
         for (const [key, value] of Object.entries(data)) {
             let dataG = value.split(","),
-            lx = e.layerX - 10,
-            ly = e.layerY - c.height + 25,
-            dx = dataG[1],
-            dy = dataG[0];
-            if (range(dx-10,Math.floor(dx)+10).includes(lx)){
-                //  console.log(dx, 'X includes', lx);
-            } 
-            if(range(dy-10,Math.floor(dy)+10).includes(ly)){
-                // console.log(dy, 'Y includes', ly);
-            }
-           
-                if (range(dx-10,Math.floor(dx)+10).includes(lx) && range(dy-10,Math.floor(dy)+10).includes(ly)) {
-                    // console.log(lx,ly,dx,dy, dataG[2]);
-                    // $('draw-canvas-data-set').innerHTML = dataG[2] + ':' + 'dx' + dataG[1] + 'dy' + dataG[0] + 'lx' +lx + 'ly' + ly;
-                    $('draw-canvas-data-set').innerHTML = dataG[3] + ':' + dataG[2]
-                    $('draw-canvas-data-set').style.opacity = "1"
-                    $('draw-canvas-data-set').style.left = e.clientX + "px"
-                    $('draw-canvas-data-set').style.top = e.clientY + "px"
-                }else{ 
-                // if (!range(dx-10,Math.floor(dx)+10).includes(lx) && !range(dy-10,Math.floor(dy)+10).includes(ly)) {
-                    // $('draw-canvas-data-set').style.opacity = "0.3"
-                    // console.log(lx,ly,dx,dy, dataG);
+            lx = Number(e.offsetX), // - 10,
+            ly = Number(e.offsetY), // - c.height + 25,
+            dx = Number(dataG[1]), // x axis
+            dy = Number(dataG[0]); // y axis
+
+           let _delta = Math.floor(Number(dataG[4])/ 3);
+           if (_delta < 10){ _delta = 10};
+              
+            if ( ( lx > dx - _delta && lx < dx + _delta  )  && ( ly > dy - _delta && ly < dy + _delta  ) ){
+               
+                if ( _ID == 'E'){
+                  
+                        tabE.innerHTML     = dataG[3] + ':' + dataG[2]    // $('draw-canvas-data-set')
+                        tabE.style.opacity = "1"                      // $('draw-canvas-data-set') 
+                        tabE.style.left    = e.layerX + "px"            // $('draw-canvas-data-set') 
+                        tabE.style.top     = e.layerY + "px"             // $('draw-canvas-data-set') 
+
+
+
+                    }else if ( _ID == 'G'){
+
+                        tabG.innerHTML     = dataG[3] + ':' + dataG[2]   //$('draw-canvas-data-setG')
+                        tabG.style.opacity = "1"                     //$('draw-canvas-data-setG')
+                        tabG.style.left    = e.layerX + "px"           //$('draw-canvas-data-setG')
+                        tabG.style.top     = e.layerY + "px"            //$('draw-canvas-data-setG')
+
+                    }
                 }
+                else{ 
+                   // not found...
+                 }
                 lx = lx -1
                 dx = dx -1
         }
@@ -155,11 +190,10 @@ async function wrapper(){
 
 function getMinMaxUn(_A){
 
-    let min = 0,
+        min = 0,
         max = 0;
 
     let _result =[];
-    // let A = [ dataX, datal1, datal2, datal3];           // Combine all arrays
 if (_A.length >= 1){
 
     if (Array.isArray(_A[0])){
@@ -175,10 +209,9 @@ if (_A.length >= 1){
 }
 if(min == max){
 
-    // if (Array.isArray(_A_)){
         if ( (max-min) > 10){
-    min = _A[0] * 0.999;
-    max = _A[0] * 1.001;
+            min = _A[0] * 0.999;
+            max = _A[0] * 1.001;
         }else{
             min = _A[0] - 10;
             max = _A[0] + 10;
@@ -195,13 +228,13 @@ if(min == max){
     }else if ( (max-min) > 10){
         max = Math.ceil(max * 1) / 1;
         min = Math.ceil(min * 1) / 1;
-        un = Math.ceil(un * 1) / 1;
+        un = Math.ceil(un * 10) / 10;
     }else if ( (max-min) > 1){
       un = (Math.ceil( (max - min) *10) ) /10;
       max = Math.ceil( max * 10) / 10;
       min = Math.ceil( min * 10) / 10;
     }else if ( (max-min) > 0){
-        un = (Math.ceil( (max - min) *100) ) / 100;
+        un = (Math.ceil( (max - min) *10) ) / 10;
         max = Math.ceil( max * 100) / 100;
         min = Math.ceil( min * 100) / 100;
     }
@@ -216,6 +249,7 @@ if(min == max){
 
 function drawLine(){
 
+    // Electric
     if (dataX.length != 0){
 
     let A = [ dataX, datal1, datal2, datal3];           // Combine all arrays
@@ -235,26 +269,26 @@ function drawLine(){
     chart.pointes();
     }
 
-    // if (dataGas.length != 0){
+    // Gas
+    if (dataGasPoint.length != 0){
 
-
-    //     let datag = [];
-    // for (datagas of dataGas){
-    //     datag.push(datagas[1]);
-    // }
-    //     let result = getMinMaxUn(datag);
-    //     min = result[0];
-    //     max = result[1];
-    //     un  = result[2];  
+        let datag = [];
+    for (datagas of dataGasPoint){
+        datag.push(datagas[5]);
+    }
+        let result = getMinMaxUn(datag);
+        min = result[0];
+        max = result[1];
+        un  = result[2];  // 1/10 of the axis
   
-    //     ys = (w-80)/dataY.length;
-    //     chart.setCtx(CtxG);
-    //     chart.chartLine()
-    //     chart.digram()
-    //     chart.dataGas();
-    //     chart.drawG();
-    //     chart.pointesGas();
-    // }
+        ys = (w-80)/dataYG.length; // Every points distance on x-axis
+        chart.setCtx(CtxG);
+        chart.chartLine()
+        chart.digram()
+        chart.dataGas();
+        chart.drawG();
+        chart.pointesGas();
+    }
 
     return true;
 }
@@ -263,9 +297,8 @@ function run(){
 
     button_stop = false;
   
-   
-
     ip = document.getElementById('IP').value; 
+
         if (ip != ''){
         Init(); 
 
@@ -274,16 +307,54 @@ function run(){
          if(e_stop){
             e_stop.style.opacity = 1 };  // Show Stop
 
-        dataY = [];    
+        dataY = []; 
+        dataYG = [];    
         dataX = [];  
         datal1 = [];  
         datal2 = [];  
         datal3 = [];  
         dataT = []; // All entries of all graphs
         dataGas = [];
+        dataGasPoint = [];
         iteration = 1;       
         wrapper() ;
         
+    }else{
+        // fake numbers insert
+        dataY = [1,2,3,4,5,6,7,8,9,10];  // x-axis :) 
+        dataYG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
+
+        dataX = [1000,10010,1001,980,1023,899,455,1200,300,10]; // y-axis values Totals
+        datal1 = [151,242,353,264,115,36,645,374,493,2];
+        datal2 = [12,14,15,33,22,44,77,22,33,34];
+        datal3 = [34,866,333,700,600,345,333,1111,233,1];
+
+        dataGas = [ 
+        ['21:10:06/22-11-22', 3037.961, 76206],
+        ['21:10:06/22-11-22', 3037.961, 76206],
+        ['21:10:06/22-11-22', 3037.961, 76206],
+        ['21:15:05/22-11-22', 3038.991, 76505],
+        ['21:15:05/22-11-22', 3038.991, 76505],
+        ['21:15:05/22-11-22', 3038.991, 76505],
+        ['21:20:05/22-11-22', 3039.991, 76505],
+        ['21:20:05/22-11-22', 3039.991, 76505]
+        ];
+       
+        dataGasPoint = [ 
+            ["18:10:00/22-11-22",2000.101, 75005, 2, 5, 0.4], 
+            ["18:10:00/22-11-22",2000.108, 75305, 125, 5, 25], 
+            ["18:10:00/22-11-22",2000.150, 75605, 100, 5, 20], 
+            ["18:10:00/22-11-22",2000.200, 75905, 0.0, 5, 0], 
+            ["18:10:00/22-11-22",2000.202, 76205, 28, 5, 15], 
+            ["18:10:00/22-11-22",2000.205, 76505, 255, 5, 50],
+            ["18:10:00/22-11-22",2001.206, 76805, 25, 5, 5], 
+            ["18:10:00/22-11-22",2001.209, 77105, 133, 5, 25]  
+            ];
+        iteration = 1;       
+        Ctx.clearRect(0, 0, w, h);
+        CtxG.clearRect(0,0,wg,hg);
+        drawLine();
+
     }
 }
 
@@ -308,118 +379,92 @@ async function meter(i){
       // get the response body (the method explained below)
       let json = await response.json();
 
-    document.getElementById('WifiSSID').innerHTML       = json.wifi_ssid;  // wifi_ssid :  WifiSSID
-    document.getElementById('WifiStrength').innerHTML   = json.wifi_strength;  // wifi_strength : 
+      dataX.push(json.active_power_w);
+      datal1.push(json.active_power_l1_w);
+      datal2.push(json.active_power_l2_w);
+      datal3.push(json.active_power_l3_w);
+      dataY.push(i);
+
+// Write to Screen
+
+    // Details
+    document.getElementById('WifiSSID').innerHTML       = json.wifi_ssid;       // wifi_ssid :  WifiSSID
+    document.getElementById('WifiStrength').innerHTML   = json.wifi_strength;   // wifi_strength : 
     document.getElementById('MM').innerHTML             = json.meter_model;     //meter_model
     document.getElementById('SV').innerHTML             = json.smr_version;     //smr_version: 
     
-    // Always Phase 1    
-    document.getElementById('P1').innerHTML             = json.active_power_l1_w;
+    // Electric
+      writeNumbers_E(json);
 
-    // Phase 2 when given in api, clear otherwise
-      if(json.active_power_l2_w){
-        document.getElementById('P2').innerHTML = json.active_power_l2_w }else{
-        document.getElementById('P2').innerHTML = '';
-      }
-    // Phase 3 when given in api, clear otherwise
-      if(json.active_power_l3_w){
-        document.getElementById('P3').innerHTML = json.active_power_l3_w }else{
-        document.getElementById('P3').innerHTML = '';
-      };
-    document.getElementById('PT').innerHTML             = json.active_power_w;
-
-    dataX.push(json.active_power_w);
-    datal1.push(json.active_power_l1_w);
-    datal2.push(json.active_power_l2_w);
-    datal3.push(json.active_power_l3_w);
-    dataY.push(i);
-    
-
-    let deltas = delta_calc(dataX);
-    document.getElementById('PTd3').innerHTML             = deltas[0];
-    document.getElementById('PTd2').innerHTML             = deltas[1];
-    document.getElementById('PTd1').innerHTML             = deltas[2];
-    let deltal1 = delta_calc(datal1);
-    document.getElementById('P1d3').innerHTML             = deltal1[0];
-    document.getElementById('P1d2').innerHTML             = deltal1[1];
-    document.getElementById('P1d1').innerHTML             = deltal1[2];
-    let deltal2 = delta_calc(datal2);
-    document.getElementById('P2d3').innerHTML             = deltal2[0];
-    document.getElementById('P2d2').innerHTML             = deltal2[1];
-    document.getElementById('P2d1').innerHTML             = deltal2[2];
-    let deltal3 = delta_calc(datal3);
-    document.getElementById('P3d3').innerHTML             = deltal3[0];
-    document.getElementById('P3d2').innerHTML             = deltal3[1];
-    document.getElementById('P3d1').innerHTML             = deltal3[2];
-
-    // ctx.clear();
-    //  ctx.clearRect(0, 0, window.width, window.height);
-     Ctx.clearRect(0, 0, w, h);
-    //  CtxG.clearRect(0,0,wg,hg);
+    Ctx.clearRect(0, 0, w, h);
+    CtxG.clearRect(0,0,wg,hg);
 
     drawLine();
 
-    // total_power_export_t1_kwh:  
-    document.getElementById('ET1').innerHTML = json.total_power_export_t1_kwh;
-    // total_power_export_t2_kwh: 
-    document.getElementById('ET2').innerHTML = json.total_power_export_t2_kwh;
-    // total_power_import_t1_kwh : 
-    document.getElementById('IT1').innerHTML = json.total_power_import_t1_kwh;
-    // total_power_import_t2_kwh :
-    document.getElementById('IT2').innerHTML = json.total_power_import_t2_kwh;
-
     // Gas details
     if(json.gas_timestamp){
-        // YYMMDDhhmmss
-   let _stamp = json.gas_timestamp.toString();
+    
+    // YYMMDDhhmmss
+        let _stamp = json.gas_timestamp.toString();
         
-       let hh = _stamp.substring(6,8)  ;
-       let mm = _stamp.substring(8,10) ;
-       let ss = _stamp.substring(10,12);
+        let hh = _stamp.substring(6,8)  ;
+        let mm = _stamp.substring(8,10) ;
+        let ss = _stamp.substring(10,12);
 
-       let YY = _stamp.substring(4,6) ;
-       let MM = _stamp.substring(2,4) ;
-       let DD = _stamp.substring(0,2) ;
+        let YY = _stamp.substring(4,6) ;
+        let MM = _stamp.substring(2,4) ;
+        let DD = _stamp.substring(0,2) ;
     
         let _time = hh + ':' + mm + ':' + ss;
         let _date = YY + '-' + MM + '-' + DD;
+
+        // hh:mm:ss/YY-MM-DD
             _time = _time + '/' + _date;
-        let _timestamp = Number(ss) + Number(60*mm) + Number(3600*hh);
 
+        // Timestamp in seconds as number    
+        let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
+        let _deltaGas   = 0;
+        let _min        = 0;
+        let _usage      = 0;
+
+        // When have a first entrie...we want unique entris afterwards
         if (dataGasPoint.length != 0){
-
+        // Is this entry unique now?    
         if (dataGasPoint[dataGasPoint.length-1][2]  != _timestamp || debug == true){
             
-            console.log(hh,mm,ss,_time,_timestamp);
-            // dataGas.push([_time, json.total_gas_m3]) ;
+         if(debug){ console.log(hh,mm,ss,_time,_timestamp)};
+            // String to screen
             _string = _string + _time + ' : ' + json.total_gas_m3;
 
-            dataGasPoint.push([_time, json.total_gas_m3, _timestamp])
-            
-            if ( dataGasPoint.length > 1){
-                let _deltaGas =  Math.floor( ( dataGasPoint[dataGasPoint.length-1][1]*100 -  dataGasPoint[dataGasPoint.length-2][1]*100 ) *1000 ) / 100;
+            // Save this unique timestamped Gas result to internal table
+            //  dataGasPoint.push([_time, json.total_gas_m3, _timestamp])
+
+            // When we have 2 or more entries saved...we can make some calculations
+            if ( dataGasPoint.length > 0){
+                 _deltaGas =  Math.floor( ( json.total_gas_m3*100 -  dataGasPoint[dataGasPoint.length-1][1]*100 ) *1000 ) / 100;
                 
-                let _min  = (dataGasPoint[dataGasPoint.length-1][2] - dataGasPoint[dataGasPoint.length-2][2]) /60; // temp constant 
-                _string = _string + ' Delta:' + _deltaGas + ' liter/' + Math.floor(_min*10)/10 + 'min. ';
+                 _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60; // temp constant 
+                 _string = _string + ' Delta:' + _deltaGas + ' liter/' + Math.floor(_min*10)/10 + 'min. ';
 
                 if (_min != 0){
-                let _usage = Math.round(_deltaGas * 100 / _min) / 100;
-                console.log(dataGasPoint[dataGasPoint.length-1][2], dataGasPoint[dataGasPoint.length-2][2],_usage, _min)
-                _string = _string + 'Flow:' + _usage + ' l/min';
+                 _usage = Math.round(_deltaGas * 100 / _min) / 100;
+                 // console.log(dataGasPoint[dataGasPoint.length-1][2], dataGasPoint[dataGasPoint.length-2][2],_usage, _min)
+                 _string = _string + 'Flow:' + _usage + ' l/min';
                 }
 
             }
-            _string = _string + '<br>';
-        }  
-        dataGas.push([_time, json.total_gas_m3, _timestamp]) ;
+             _string = _string + '<br>';
+             dataGasPoint.push([_time, json.total_gas_m3, _timestamp, _deltaGas, _min, _usage])  
+             dataYG.push(i);
+            }
+            dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed 
 
         }else{
-            dataGas.push([_time, json.total_gas_m3, _timestamp]) ;
-            dataGasPoint.push([_time, json.total_gas_m3, _timestamp]);
-            // _string = Gas[0] + ' : ' + Gas[1] + '<br>';
+            dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed
+            dataGasPoint.push([_time, json.total_gas_m3, _timestamp, null, null, null]);
+            dataYG.push(i);
             _string = _time + ' : ' + json.total_gas_m3 + '<br>';
         }
-
 
         // let _string = '';
         // for (Gas of dataGas){   
@@ -427,7 +472,7 @@ async function meter(i){
         // }
         document.getElementById('TimeGasM3').innerHTML = _string;
 
-    //total_gas_m3 G0
+        //total_gas_m3 G0
     }
 
     // Water details
@@ -444,12 +489,57 @@ async function meter(i){
     }
     return _return ;
 
-    } else {
+    }           // response OK 
+    else {      // response ERROR
       alert("HTTP-Error: " + response.status);
     }
 
 }
 
+function writeNumbers_E(json){
+      // Always Phase 1    
+      document.getElementById('P1').innerHTML             = json.active_power_l1_w;
+
+      // Phase 2 when given in api, clear otherwise
+        if(json.active_power_l2_w){
+          document.getElementById('P2').innerHTML = json.active_power_l2_w }else{
+          document.getElementById('P2').innerHTML = '';
+        }
+      // Phase 3 when given in api, clear otherwise
+        if(json.active_power_l3_w){
+          document.getElementById('P3').innerHTML = json.active_power_l3_w }else{
+          document.getElementById('P3').innerHTML = '';
+        };
+  
+      document.getElementById('PT').innerHTML             = json.active_power_w;
+  
+      let deltas = delta_calc(dataX);
+      document.getElementById('PTd3').innerHTML             = deltas[0];
+      document.getElementById('PTd2').innerHTML             = deltas[1];
+      document.getElementById('PTd1').innerHTML             = deltas[2];
+      let deltal1 = delta_calc(datal1);
+      document.getElementById('P1d3').innerHTML             = deltal1[0];
+      document.getElementById('P1d2').innerHTML             = deltal1[1];
+      document.getElementById('P1d1').innerHTML             = deltal1[2];
+      let deltal2 = delta_calc(datal2);
+      document.getElementById('P2d3').innerHTML             = deltal2[0];
+      document.getElementById('P2d2').innerHTML             = deltal2[1];
+      document.getElementById('P2d1').innerHTML             = deltal2[2];
+      let deltal3 = delta_calc(datal3);
+      document.getElementById('P3d3').innerHTML             = deltal3[0];
+      document.getElementById('P3d2').innerHTML             = deltal3[1];
+      document.getElementById('P3d1').innerHTML             = deltal3[2];
+  
+      // total_power_export_t1_kwh:  
+      document.getElementById('ET1').innerHTML = json.total_power_export_t1_kwh;
+      // total_power_export_t2_kwh: 
+      document.getElementById('ET2').innerHTML = json.total_power_export_t2_kwh;
+      // total_power_import_t1_kwh : 
+      document.getElementById('IT1').innerHTML = json.total_power_import_t1_kwh;
+      // total_power_import_t2_kwh :
+      document.getElementById('IT2').innerHTML = json.total_power_import_t2_kwh;
+  
+}
 
 async function waitInterval(callback, ms) {
     return new Promise(resolve => {
@@ -498,6 +588,7 @@ digram: function(){
     y = 60
     x = 1
     ctx.strokeStyle = "#a7a7a7"
+    // Vertical lines left to right
     while(y < w){
         ctx.beginPath()
         ctx.moveTo(y,0)
@@ -505,6 +596,7 @@ digram: function(){
         ctx.stroke()
         y += 30
     }
+    // Horizontal lines top to bottom
     while(x < h-30){
         ctx.beginPath()
         ctx.moveTo(60,x)
@@ -528,39 +620,28 @@ chartLine: function() {
 ,
 draw: function() {
     ctx.save()
+
     ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
-    ctx.lineWidth = 3
+    ctx.lineWidth = 4
     ctx.beginPath()
     // ctx.lineJoin = "round";
     y = 60
     height = h-30
     line = 30
-    start = 0;//30
-    // ctx.moveTo(60, h-30);
-    for(data of dataX){
-        // max = Math.max(...dataX),
-        // test = 30;
-        let A = [ dataX, datal1, datal2, datal3];
-        // let maxArray = A.map(a => Math.max.apply(null, a));
-        // max = Math.max(...maxArray),
-        max = getMinMaxUn(A)[1];
-        test = 30;
+    start = 0;
+    let A = [ dataX, datal1, datal2, datal3];
+    MMU = getMinMaxUn(A);
 
-        while (max > data){
-            max = max - 1
-            test += line/un
-        }
-        // ctx.lineTo(30+y,test)
+    for(data of dataX){
+
+        test = 30; // offset
+        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+
         ctx.lineTo(y,test)
-        x = 0 ;//30
         y += ys
     }
     ctx.stroke()
-    // ctx.restore()
-
-    // ctx.save()
-   
-    // ctx.strokeStyle = "#00FF00" //green
+    
     chart.setStrokeStyle("#00FF00");
     ctx.lineWidth = 3
     ctx.beginPath()
@@ -570,26 +651,14 @@ draw: function() {
     start = 0;// 30
   
     for(data of datal1){
-        let A = [ dataX, datal1, datal2, datal3];
-        // let maxArray = A.map(a => Math.max.apply(null, a));
-        // max = Math.max(...maxArray),
-        max = getMinMaxUn(A)[1];
-        test = 30;
 
-        while (max > data){
-            max = max - 1
-            test += line/un
-        }
-        // ctx.lineTo(30+y,test)
+        test = 30;
+        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        x = 0;//30
         y += ys
     }
     ctx.stroke()
-    // ctx.restore()
-
    
-    // ctx.strokeStyle = "#d6d610" //"#FFFF00" //yellow
     chart.setStrokeStyle("#d6d610");
     ctx.lineWidth = 3
     ctx.beginPath()
@@ -598,26 +667,14 @@ draw: function() {
     line = 30
     start = 0 ;//30
     for(data of datal2){
-        let A = [ dataX, datal1, datal2, datal3];
-        // let maxArray = A.map(a => Math.max.apply(null, a));
-        // max = Math.max(...maxArray),
-        max = getMinMaxUn(A)[1];
         test = 30;
-        while (max > data){
-            max = max - 1
-            test += line/un
-        }
-        // ctx.lineTo(30+y,test)
+        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        x = 0;//30
         y += ys
     }
     ctx.stroke()
-    // ctx.restore()
 
-   
-    // ctx.strokeStyle = "#A020F0" // purple
-    chart.setStrokeStyle("#A020F0");
+    chart.setStrokeStyle("#A020F0");// purple
     ctx.lineWidth = 3
     ctx.beginPath()
     y = 60
@@ -625,65 +682,51 @@ draw: function() {
     line = 30
     start = 0 ; //30
     for(data of datal3){
-        let A = [ dataX, datal1, datal2, datal3];
-        // let maxArray = A.map(a => Math.max.apply(null, a));
-        // max = Math.max(...maxArray),
-        max = getMinMaxUn(A)[1];
         test = 30;
-        while (max > data){
-            max = max - 1
-            test += line/un
-        }
-        // ctx.lineTo(30+y,test)
+        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        x = 30
         y += ys
     }
     ctx.stroke()
     ctx.restore()
 },
-// drawG: function() {
-//     ctx.save()
-//     ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
-//     ctx.lineWidth = 3
-//     ctx.beginPath()
-//     // ctx.lineJoin = "round";
-//     y = 60
-//     height = h-30
-//     line = 30
-//     start = 0;//30
-//     // ctx.moveTo(60, h-30);
-//     for(data of dataGas){
 
-//         // max = Math.max(...dataGas),
-//         let datag = [];
-//         for (datagas of dataGas){
-//             datag.push(datagas[1]);
-//         }
-//         max = getMinMaxUn(datag)[1];
-//         test = 30;
+drawG: function() {
+    ctx.save()
+    ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    y = 60
+    height = h-30
+    line = 30;
+            let datag = [];
+            for (datagas of dataGasPoint){
+                datag.push(datagas[5]); // datagas[1], datagas[3], 
+            }
 
-//         while (max > data[1]){
-//             max = max - 1
-//             test += line/un
-//         }
-//         // ctx.lineTo(30+y,test)
-//         ctx.lineTo(y,test)
-//         x = 0 ;//30
-//         y += ys
-//     }
+    const MMU = getMinMaxUn(datag);
 
-//     ctx.stroke()
-//     ctx.restore()
-// },
+    for(data of dataGasPoint){   //dataGas has second info, ...Point has unique points
+
+        test = 30;
+        test += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(y,test)
+        y += ys
+    }
+
+    ctx.stroke()
+    ctx.restore()
+},
 
 pointes: function() {
+
+    let A = [ dataX, datal1, datal2, datal3];
+    const MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
     y = 60
     height = h-30
     line = 30
-    start = 0;//30
     for (data of dataX) {
         this.points(data, dataX, 'Tot.')
     }
@@ -692,7 +735,7 @@ pointes: function() {
     y = 60
     height = h-30
     line = 30
-    start = 0; //30
+    start = 30
     for (data of datal1) {
         this.points(data, datal1, 'l1')
     }
@@ -701,7 +744,7 @@ pointes: function() {
     y = 60
     height = h-30
     line = 30
-    start = 0; //30
+    start = 30
     for (data of datal2) {
         this.points(data, datal2, 'l2')
     }
@@ -710,7 +753,7 @@ pointes: function() {
     y = 60
     height = h-30
     line = 30
-    start = 0; //30
+    start = 30
     for (data of datal3) {
         this.points(data, datal3 ,'l3')
     }
@@ -719,77 +762,53 @@ pointes: function() {
     ctx.stroke()
 },
 points: function(d, dX, f){
-    // max = Math.max(...dX),
-     // test = 30;
-    // max = 1000; //test
-    let A = [ dataX, datal1, datal2, datal3];
-    // let maxArray = A.map(a => Math.max.apply(null, a));
-    // max = Math.max(...maxArray),
-    max = getMinMaxUn(A)[1];
-    test = 30;
 
-while (max > d) {
-    max = max - 1
-    test += line / un
-}
-// chart.circle(30 + y, test)
+test = 30;
+test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
 chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f})
-x = 0; //30
-y += ys
+dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f +"," + MMU})
+y += ys;
 },
 
 
-// pointesGas: function() {
+pointesGas: function() {
 
-//     ctx.fillStyle = "#0b95d3"
-//     y = 60
-//     height = h-30
-//     line = 30
-//     start = 0;//30
-//     for (data of dataGas) {
-//         this.pointsGas(data, dataGas, 'Gas:')
-//     }
+    ctx.fillStyle = "#0b95d3"
+    y = 60
+    height = h-30
+    line = 30
+    start = 30;
 
-//     ctx.fillStyle = "#00000F" 
+    let datag = [];
+    for (datagas of dataGasPoint){
+        datag.push(datagas[5]);
+    }
+    MMU = getMinMaxUn(datag);
 
-//     ctx.stroke()
-// },
-// pointsGas: function(d, dX, f){
-//     // max = Math.max(...dX),
-//      // test = 30;
-//     // max = 1000; //test
-//     // let A = [ dataX, datal1, datal2, datal3];
-//     // let maxArray = A.map(a => Math.max.apply(null, a));
-//     // max = Math.max(...dataGas),
-//     let datag = [];
-//     for (datagas of dataGas){
-//         datag.push(datagas[1]);
-//     }
-//     max = getMinMaxUn(datag)[1];
-//     test = 30;
+    for (data of dataGasPoint) {
+        this.pointsGas(data[5], dataGasPoint, 'Gas')
+    }
 
-// while (max > d[1]) {
-//     max = max - 1
-//     test += line / un
-// }
-// // chart.circle(30 + y, test)
-// chart.circle(y, test)
-// dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f})
-// x = 0; //30
-// y += ys
-// },
+    ctx.fillStyle = "#00000F" 
+
+    ctx.stroke()
+},
+pointsGas: function(d, dX, f){
+
+test = 30;
+test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+chart.circle(y, test)
+dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f + "," + MMU})
+y += ys ; // Every 5 minutes : should be
+},
 
  data: function() {
     y = 60
     x = 30
-    // n = Math.max(...dataX)
-    // n = 1000; //temp
 
     let A = [ dataX, datal1, datal2, datal3];
     let maxArray = A.map(a => Math.max.apply(null, a));
-    n = Math.max(...maxArray)
-    n = Math.ceil(n / 10) * 10;
+    n = max;
 
     for(ydata of dataY){
         ctx.font = "12px Arial";
@@ -805,10 +824,6 @@ y += ys
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
             y += ys*10;
         }else
-        // if (dataY.length > 50){
-        //     ctx.fillText(ydata*6, y +6*ys ,h-10); 
-        //     y += ys*6;
-        // }else
         if (dataY.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
             y += ys*5;
@@ -830,59 +845,48 @@ y += ys
     }
     
 },
-// dataGas: function() {
-//     y = 60
-//     x = 30
 
-//     // let A = [ dataX, datal1, datal2, datal3];
-//     // let maxArray = A.map(a => Math.max.apply(null, a));
-//     // n = Math.max(...maxArray)
-//     let datag = [];
-//     for (datagas of dataGas){
-//         datag.push(datagas[1]);
-//     }
-//     n = Math.max(...datag)
-//     n = Math.ceil(n / 10) * 10;
+dataGas: function() {
+    y = 60
+    x = 30
+    n = max;
 
-//     for(ydata of dataY){
-//         ctx.font = "12px Arial";
-//         if (dataY.length > 300){
-//             ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
-//             y += ys*60;
-//         }else
-//         if (dataY.length > 140){
-//             ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
-//             y += ys*20;
-//         }else
-//         if (dataY.length > 50){
-//             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
-//             y += ys*10;
-//         }else
-//         // if (dataY.length > 50){
-//         //     ctx.fillText(ydata*6, y +6*ys ,h-10); 
-//         //     y += ys*6;
-//         // }else
-//         if (dataY.length > 20){
-//             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
-//             y += ys*5;
-//         }else 
-//         if (dataY.length > 10){
-//             ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
-//             y += ys*2;
-//         }else{
-//         ctx.fillText(ydata, y,h-10);
-//         y += ys;
-//         }
+    for(ydata of dataYG){
+        ctx.font = "12px Arial";
+        if (dataYG.length > 300){
+            ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
+            y += ys*60;
+        }else
+        if (dataYG.length > 140){
+            ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
+            y += ys*20;
+        }else
+        if (dataYG.length > 50){
+            ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
+            y += ys*10;
+        }else
+        if (dataYG.length > 20){
+            ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
+            y += ys*5;
+        }else 
+        if (dataYG.length > 10){
+            ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
+            y += ys*2;
+        }else{
+        ctx.fillText(ydata, y,h-10);
+        y += ys;
+        }
         
-//     }
-//     while(x < h-30){
-//         ctx.font = "11px Arial";
-//         ctx.fillText(n, 0,x+5);
-//         n = n -un
-//         x += 30
-//     }
+    }
+    while(x < h-30){
+        ctx.font = "11px Arial";
+        ctx.fillText(n, 0,x+5);
+        n = n -un
+        n = Math.floor(n*100)/100;
+        x += 30
+    }
     
-// },
+},
 
 circle: function(x,y) {
     ctx.beginPath();
@@ -891,11 +895,6 @@ circle: function(x,y) {
 }
 }
 
-
-function range(start, end) {
-    let range = [...Array(end + 1).keys()].filter(value => end >= value && start <= value );
-    return range
-}
 function $(object){
     return document.querySelector(object);
 }
