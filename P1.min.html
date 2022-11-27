@@ -178,7 +178,7 @@ window.onload = function() {
 }
 
     Init();
-    // document.getElementById('IP').value = '192.168.2.45';
+    document.getElementById('IP').value = '192.168.2.45';
 };
 
 async function wrapper(){
@@ -276,10 +276,10 @@ function drawLine(){
     for (datagas of dataGasPoint){
         datag.push(datagas[5]);
     }
-        let result = getMinMaxUn(datag);
-        min = result[0];
-        max = result[1];
-        un  = result[2];  // 1/10 of the axis
+        MMU = getMinMaxUn(datag);
+        min = MMU[0];
+        max = MMU[1];
+        un  = MMU[2];  // 1/10 of the axis
   
         ys = (w-80)/dataYG.length; // Every points distance on x-axis
         chart.setCtx(CtxG);
