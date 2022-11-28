@@ -33,9 +33,9 @@ let h = 0;
 let w = 0;
 let Ctx  = {}; // Electr Canvas 
 let CtxG = {}; // Gas    Canvas
-let dataY = [];
-let dataYG = [];
 let dataX = [];
+let dataXG = [];
+let dataL_Total = [];
 let datal1 = [];
 let datal2 = [];
 let datal3 = [];
@@ -70,10 +70,10 @@ function Init(){
         e_stop.style.opacity = 0 };
 
         iteration = 0;
-        dataY = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        dataX = [0,100];
-        un = Math.round((Math.max(...dataX)-Math.min(...dataX))/10)
-        ys = (w-80)/dataY.length; // steps on horizontal axis
+        dataX = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        dataL_Total = [0,100];
+        un = Math.round((Math.max(...dataL_Total)-Math.min(...dataL_Total))/10)
+        ys = (w-80)/dataX.length; // steps on horizontal axis
         dataT = [];
 
         // Initialise Diagram framwork
@@ -250,16 +250,16 @@ if(min == max){
 function drawLine(){
 
     // Electric
-    if (dataX.length != 0){
+    if (dataL_Total.length != 0){
 
-    let A = [ dataX, datal1, datal2, datal3];           // Combine all arrays
+    let A = [ dataL_Total, datal1, datal2, datal3];           // Combine all arrays
     let result = getMinMaxUn(A);
     min = result[0];
     max = result[1];
     un  = result[2];  
 
-    // ys = (w-40)/dataY.length;
-    ys = (w-80)/dataY.length;
+    // ys = (w-40)/dataX.length;
+    ys = (w-80)/dataX.length;
     dataT = [];
     chart.setCtx(Ctx);
     chart.chartLine()
@@ -281,7 +281,7 @@ function drawLine(){
         max = MMU[1];
         un  = MMU[2];  // 1/10 of the axis
   
-        ys = (w-80)/dataYG.length; // Every points distance on x-axis
+        ys = (w-80)/dataXG.length; // Every points distance on x-axis
         chart.setCtx(CtxG);
         chart.chartLine()
         chart.digram()
@@ -307,9 +307,9 @@ function run(){
          if(e_stop){
             e_stop.style.opacity = 1 };  // Show Stop
 
-        dataY = []; 
-        dataYG = [];    
-        dataX = [];  
+        dataX = []; 
+        dataXG = [];    
+        dataL_Total = [];  
         datal1 = [];  
         datal2 = [];  
         datal3 = [];  
@@ -321,10 +321,10 @@ function run(){
         
     }else{
         // fake numbers insert
-        dataY = [1,2,3,4,5,6,7,8,9,10];  // x-axis :) 
-        dataYG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
+        dataX = [1,2,3,4,5,6,7,8,9,10];  // x-axis :) 
+        dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
 
-        dataX = [1000,10010,1001,980,1023,899,455,1200,300,10]; // y-axis values Totals
+        dataL_Total = [1000,10010,1001,980,1023,899,455,1200,300,10]; // y-axis values Totals
         datal1 = [151,242,353,264,115,36,645,374,493,2];
         datal2 = [12,14,15,33,22,44,77,22,33,34];
         datal3 = [34,866,333,700,600,345,333,1111,233,1];
@@ -379,11 +379,11 @@ async function meter(i){
       // get the response body (the method explained below)
       let json = await response.json();
 
-      dataX.push(json.active_power_w);
+      dataL_Total.push(json.active_power_w);
       datal1.push(json.active_power_l1_w);
       datal2.push(json.active_power_l2_w);
       datal3.push(json.active_power_l3_w);
-      dataY.push(i);
+      dataX.push(i);
 
 // Write to Screen
 
@@ -455,14 +455,14 @@ async function meter(i){
             }
              _string = _string + '<br>';
              dataGasPoint.push([_time, json.total_gas_m3, _timestamp, _deltaGas, _min, _usage])  
-             dataYG.push(i);
+             dataXG.push(i);
             }
             dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed 
 
         }else{
             dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed
             dataGasPoint.push([_time, json.total_gas_m3, _timestamp, null, null, null]);
-            dataYG.push(i);
+            dataXG.push(i);
             _string = _time + ' : ' + json.total_gas_m3 + '<br>';
         }
 
@@ -513,7 +513,7 @@ function writeNumbers_E(json){
   
       document.getElementById('PT').innerHTML             = json.active_power_w;
   
-      let deltas = delta_calc(dataX);
+      let deltas = delta_calc(dataL_Total);
       document.getElementById('PTd3').innerHTML             = deltas[0];
       document.getElementById('PTd2').innerHTML             = deltas[1];
       document.getElementById('PTd1').innerHTML             = deltas[2];
@@ -629,10 +629,10 @@ draw: function() {
     height = h-30
     line = 30
     start = 0;
-    let A = [ dataX, datal1, datal2, datal3];
+    let A = [ dataL_Total, datal1, datal2, datal3];
     MMU = getMinMaxUn(A);
 
-    for(data of dataX){
+    for(data of dataL_Total){
 
         test = 30; // offset
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
@@ -720,15 +720,15 @@ drawG: function() {
 
 pointes: function() {
 
-    let A = [ dataX, datal1, datal2, datal3];
+    let A = [ dataL_Total, datal1, datal2, datal3];
     const MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
     y = 60
     height = h-30
     line = 30
-    for (data of dataX) {
-        this.points(data, dataX, 'Tot.')
+    for (data of dataL_Total) {
+        this.points(data, dataL_Total, 'Tot.')
     }
 
     ctx.fillStyle = "#00FF00" //green
@@ -806,29 +806,29 @@ y += ys ; // Every 5 minutes : should be
     y = 60
     x = 30
 
-    let A = [ dataX, datal1, datal2, datal3];
+    let A = [ dataL_Total, datal1, datal2, datal3];
     let maxArray = A.map(a => Math.max.apply(null, a));
     n = max;
 
-    for(ydata of dataY){
+    for(ydata of dataX){
         ctx.font = "12px Arial";
-        if (dataY.length > 300){
+        if (dataX.length > 300){
             ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
             y += ys*60;
         }else
-        if (dataY.length > 140){
+        if (dataX.length > 140){
             ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
             y += ys*20;
         }else
-        if (dataY.length > 50){
+        if (dataX.length > 50){
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
             y += ys*10;
         }else
-        if (dataY.length > 20){
+        if (dataX.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
             y += ys*5;
         }else 
-        if (dataY.length > 10){
+        if (dataX.length > 10){
             ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
             y += ys*2;
         }else{
@@ -851,25 +851,25 @@ dataGas: function() {
     x = 30
     n = max;
 
-    for(ydata of dataYG){
+    for(ydata of dataXG){
         ctx.font = "12px Arial";
-        if (dataYG.length > 300){
+        if (dataXG.length > 300){
             ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
             y += ys*60;
         }else
-        if (dataYG.length > 140){
+        if (dataXG.length > 140){
             ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
             y += ys*20;
         }else
-        if (dataYG.length > 50){
+        if (dataXG.length > 50){
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
             y += ys*10;
         }else
-        if (dataYG.length > 20){
+        if (dataXG.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
             y += ys*5;
         }else 
-        if (dataYG.length > 10){
+        if (dataXG.length > 10){
             ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
             y += ys*2;
         }else{
