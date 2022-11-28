@@ -41,8 +41,8 @@ let dataX  = [],        // X-axis
     datal3 = [];        // Phase 3
 let dataGas = [],       // Gas Every call
     dataGasPoint = [];  // Gas Every Unique Measurement
-let un = 0;
-let ys = 0;
+let un = 0;             // Unit : Value per 30 pixels 
+let xs = 0;
 let dataT = [];
 let button_stop = false;
 let tabE = {};
@@ -73,7 +73,7 @@ function Init(){
         dataX = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         dataL_Total = [0,100];
         un = Math.round((Math.max(...dataL_Total)-Math.min(...dataL_Total))/10)
-        ys = (w-80)/dataX.length; // steps on horizontal axis
+        xs = (w-80)/dataX.length; // steps on horizontal axis
         dataT = [];
 
         // Initialise Diagram framwork
@@ -133,7 +133,7 @@ window.onload = function() {
     function mouseMove(e){ 
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
-        let _tabIndex = e.currentTarget.attributes[4].nodeValue; // 1  2
+        let _tabIndeyy = e.currentTarget.attributes[4].nodeValue; // 1  2
 
         //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
 
@@ -259,7 +259,7 @@ function drawLine(){
     un  = result[2];  
 
     // ys = (w-40)/dataX.length;
-    ys = (w-80)/dataX.length;
+    xs = (w-80)/dataX.length;
     dataT = [];
     chart.setCtx(Ctx);
     chart.chartLine()
@@ -281,7 +281,7 @@ function drawLine(){
         max = MMU[1];
         un  = MMU[2];  // 1/10 of the axis
   
-        ys = (w-80)/dataXG.length; // Every points distance on x-axis
+        xs = (w-80)/dataXG.length; // Every points distance on x-axis
         chart.setCtx(CtxG);
         chart.chartLine()
         chart.digram()
@@ -585,24 +585,24 @@ var chart = {
  },
 
 digram: function(){
-    y = 60
-    x = 1
+    x = 60
+    y = 1
     ctx.strokeStyle = "#a7a7a7"
     // Vertical lines left to right
-    while(y < w){
+    while(x < w){
         ctx.beginPath()
-        ctx.moveTo(y,0)
-        ctx.lineTo(y,h-30)
-        ctx.stroke()
-        y += 30
-    }
-    // Horizontal lines top to bottom
-    while(x < h-30){
-        ctx.beginPath()
-        ctx.moveTo(60,x)
-        ctx.lineTo(w,x)
+        ctx.moveTo(x,0)
+        ctx.lineTo(x,h-30)
         ctx.stroke()
         x += 30
+    }
+    // Horizontal lines top to bottom
+    while(y < h-30){
+        ctx.beginPath()
+        ctx.moveTo(60,y)
+        ctx.lineTo(w,y)
+        ctx.stroke()
+        y += 30
     }
 },
 chartLine: function() {
@@ -625,7 +625,7 @@ draw: function() {
     ctx.lineWidth = 4
     ctx.beginPath()
     // ctx.lineJoin = "round";
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0;
@@ -637,15 +637,15 @@ draw: function() {
         test = 30; // offset
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
 
-        ctx.lineTo(y,test)
-        y += ys
+        ctx.lineTo(x,test)
+        x += xs
     }
     ctx.stroke()
     
     chart.setStrokeStyle("#00FF00");
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0;// 30
@@ -654,38 +654,38 @@ draw: function() {
 
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
-        y += ys
+        ctx.lineTo(x,test)
+        x += xs
     }
     ctx.stroke()
    
     chart.setStrokeStyle("#d6d610");
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0 ;//30
     for(data of datal2){
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
-        y += ys
+        ctx.lineTo(x,test)
+        x += xs
     }
     ctx.stroke()
 
     chart.setStrokeStyle("#A020F0");// purple
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0 ; //30
     for(data of datal3){
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
-        y += ys
+        ctx.lineTo(x,test)
+        x += xs
     }
     ctx.stroke()
     ctx.restore()
@@ -696,7 +696,7 @@ drawG: function() {
     ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30;
             let datag = [];
@@ -710,8 +710,8 @@ drawG: function() {
 
         test = 30;
         test += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
-        y += ys
+        ctx.lineTo(x,test)
+        x += xs
     }
 
     ctx.stroke()
@@ -724,7 +724,7 @@ pointes: function() {
     const MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
-    y = 60
+    x = 60
     height = h-30
     line = 30
     for (data of dataL_Total) {
@@ -732,7 +732,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#00FF00" //green
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -741,7 +741,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -750,7 +750,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#A020F0" // purple
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -765,16 +765,16 @@ points: function(d, dX, f){
 
 test = 30;
 test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f +"," + MMU})
-y += ys;
+chart.circle(x, test)
+dataT.push({ d : Math.round(test) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU})
+x += xs;
 },
 
 
 pointesGas: function() {
 
     ctx.fillStyle = "#0b95d3"
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30;
@@ -797,93 +797,93 @@ pointsGas: function(d, dX, f){
 
 test = 30;
 test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f + "," + MMU})
-y += ys ; // Every 5 minutes : should be
+chart.circle(x, test)
+dataT.push({ d : Math.round(test) + "," + Math.round(x) +","+Math.round(d) +","+f + "," + MMU})
+x += xs ; // Every 5 minutes : should be
 },
 
  data: function() {
-    y = 60
-    x = 30
+    x = 60
+    y = 30
 
     let A = [ dataL_Total, datal1, datal2, datal3];
     let maxArray = A.map(a => Math.max.apply(null, a));
     n = max;
 
-    for(ydata of dataX){
+    for(xdata of dataX){
         ctx.font = "12px Arial";
         if (dataX.length > 300){
-            ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
-            y += ys*60;
+            ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
+            x += xs*60;
         }else
         if (dataX.length > 140){
-            ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
-            y += ys*20;
+            ctx.fillText(xdata*20, x +20*xs -xs ,h-10); 
+            x += xs*20;
         }else
         if (dataX.length > 50){
-            ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
-            y += ys*10;
+            ctx.fillText(xdata*10, x +10*xs -xs ,h-10); 
+            x += xs*10;
         }else
         if (dataX.length > 20){
-            ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
-            y += ys*5;
+            ctx.fillText(xdata*5, x +5*xs - xs ,h-10); 
+            x += xs*5;
         }else 
         if (dataX.length > 10){
-            ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
-            y += ys*2;
+            ctx.fillText(xdata*2, x +2*xs - xs ,h-10); 
+            x += xs*2;
         }else{
-        ctx.fillText(ydata, y,h-10);
-        y += ys;
+        ctx.fillText(xdata, x,h-10);
+        x += xs;
         }
         
     }
-    while(x < h-30){
+    while(y < h-30){
         ctx.font = "11px Arial";
-        ctx.fillText(n, 0,x+5);
+        ctx.fillText(n, 0,y+5);
         n = n -un
-        x += 30
+        y += 30
     }
     
 },
 
 dataGas: function() {
-    y = 60
-    x = 30
+    x = 60
+    y = 30
     n = max;
 
-    for(ydata of dataXG){
+    for(xdata of dataXG){
         ctx.font = "12px Arial";
         if (dataXG.length > 300){
-            ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
-            y += ys*60;
+            ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
+            x += xs*60;
         }else
         if (dataXG.length > 140){
-            ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
-            y += ys*20;
+            ctx.fillText(xdata*20, x +20*xs -xs ,h-10); 
+            x += xs*20;
         }else
         if (dataXG.length > 50){
-            ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
-            y += ys*10;
+            ctx.fillText(xdata*10, x +10*xs -xs ,h-10); 
+            x += xs*10;
         }else
         if (dataXG.length > 20){
-            ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
-            y += ys*5;
+            ctx.fillText(xdata*5, x +5*xs - xs ,h-10); 
+            x += xs*5;
         }else 
         if (dataXG.length > 10){
-            ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
-            y += ys*2;
+            ctx.fillText(xdata*2, x +2*xs - xs ,h-10); 
+            x += xs*2;
         }else{
-        ctx.fillText(ydata, y,h-10);
-        y += ys;
+        ctx.fillText(xdata, x,h-10);
+        x += xs;
         }
         
     }
-    while(x < h-30){
+    while(y < h-30){
         ctx.font = "11px Arial";
-        ctx.fillText(n, 0,x+5);
+        ctx.fillText(n, 0,y+5);
         n = n -un
         n = Math.floor(n*100)/100;
-        x += 30
+        y += 30
     }
     
 },

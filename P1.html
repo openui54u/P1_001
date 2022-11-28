@@ -65,7 +65,7 @@ let h = 0;
 let w = 0;
 let Ctx  = {}; // Electr Canvas 
 let CtxG = {}; // Gas    Canvas
-let dataX = [];
+let datayy = [];
 let dataXG = [];
 let dataL_Total = [];
 let datal1 = [];
@@ -165,7 +165,7 @@ window.onload = function() {
     function mouseMove(e){ 
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
-        let _tabIndex = e.currentTarget.attributes[4].nodeValue; // 1  2
+        let _tabIndeyy = e.currentTarget.attributes[4].nodeValue; // 1  2
 
         //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
 
@@ -617,16 +617,16 @@ var chart = {
  },
 
 digram: function(){
-    y = 60
-    x = 1
+    x = 60
+    y = 1
     ctx.strokeStyle = "#a7a7a7"
     // Vertical lines left to right
-    while(y < w){
+    while(x < w){
         ctx.beginPath()
         ctx.moveTo(y,0)
         ctx.lineTo(y,h-30)
         ctx.stroke()
-        y += 30
+        x += 30
     }
     // Horizontal lines top to bottom
     while(x < h-30){
@@ -657,7 +657,7 @@ draw: function() {
     ctx.lineWidth = 4
     ctx.beginPath()
     // ctx.lineJoin = "round";
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0;
@@ -670,14 +670,14 @@ draw: function() {
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
 
         ctx.lineTo(y,test)
-        y += ys
+        x += ys
     }
     ctx.stroke()
     
     chart.setStrokeStyle("#00FF00");
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0;// 30
@@ -687,14 +687,14 @@ draw: function() {
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        y += ys
+        x += ys
     }
     ctx.stroke()
    
     chart.setStrokeStyle("#d6d610");
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0 ;//30
@@ -702,14 +702,14 @@ draw: function() {
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        y += ys
+        x += ys
     }
     ctx.stroke()
 
     chart.setStrokeStyle("#A020F0");// purple
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 0 ; //30
@@ -717,7 +717,7 @@ draw: function() {
         test = 30;
         test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        y += ys
+        x += ys
     }
     ctx.stroke()
     ctx.restore()
@@ -728,7 +728,7 @@ drawG: function() {
     ctx.strokeStyle = "#0b95d3"  //"#03a9f4" 
     ctx.lineWidth = 3
     ctx.beginPath()
-    y = 60
+    x = 60
     height = h-30
     line = 30;
             let datag = [];
@@ -743,7 +743,7 @@ drawG: function() {
         test = 30;
         test += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
         ctx.lineTo(y,test)
-        y += ys
+        x += ys
     }
 
     ctx.stroke()
@@ -756,7 +756,7 @@ pointes: function() {
     const MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
-    y = 60
+    x = 60
     height = h-30
     line = 30
     for (data of dataL_Total) {
@@ -764,7 +764,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#00FF00" //green
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -773,7 +773,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -782,7 +782,7 @@ pointes: function() {
     }
 
     ctx.fillStyle = "#A020F0" // purple
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30
@@ -806,7 +806,7 @@ y += ys;
 pointesGas: function() {
 
     ctx.fillStyle = "#0b95d3"
-    y = 60
+    x = 60
     height = h-30
     line = 30
     start = 30;
@@ -835,8 +835,8 @@ y += ys ; // Every 5 minutes : should be
 },
 
  data: function() {
-    y = 60
-    x = 30
+    x = 60
+    y = 30
 
     let A = [ dataL_Total, datal1, datal2, datal3];
     let maxArray = A.map(a => Math.max.apply(null, a));
@@ -846,26 +846,26 @@ y += ys ; // Every 5 minutes : should be
         ctx.font = "12px Arial";
         if (dataX.length > 300){
             ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
-            y += ys*60;
+            x += ys*60;
         }else
         if (dataX.length > 140){
             ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
-            y += ys*20;
+            x += ys*20;
         }else
         if (dataX.length > 50){
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
-            y += ys*10;
+            x += ys*10;
         }else
         if (dataX.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
-            y += ys*5;
+            x += ys*5;
         }else 
         if (dataX.length > 10){
             ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
-            y += ys*2;
+            x += ys*2;
         }else{
         ctx.fillText(ydata, y,h-10);
-        y += ys;
+        x += ys;
         }
         
     }
@@ -879,34 +879,34 @@ y += ys ; // Every 5 minutes : should be
 },
 
 dataGas: function() {
-    y = 60
-    x = 30
+    x = 60
+    y = 30
     n = max;
 
     for(ydata of dataXG){
         ctx.font = "12px Arial";
         if (dataXG.length > 300){
             ctx.fillText(ydata*60, y +60*ys -ys ,h-10); 
-            y += ys*60;
+            x += ys*60;
         }else
         if (dataXG.length > 140){
             ctx.fillText(ydata*20, y +20*ys -ys ,h-10); 
-            y += ys*20;
+            x += ys*20;
         }else
         if (dataXG.length > 50){
             ctx.fillText(ydata*10, y +10*ys -ys ,h-10); 
-            y += ys*10;
+            x += ys*10;
         }else
         if (dataXG.length > 20){
             ctx.fillText(ydata*5, y +5*ys - ys ,h-10); 
-            y += ys*5;
+            x += ys*5;
         }else 
         if (dataXG.length > 10){
             ctx.fillText(ydata*2, y +2*ys - ys ,h-10); 
-            y += ys*2;
+            x += ys*2;
         }else{
         ctx.fillText(ydata, y,h-10);
-        y += ys;
+        x += ys;
         }
         
     }
@@ -963,7 +963,7 @@ function $(object){
 <h1>Totaal (W):<span id=PT>0</span> <span id=PTd3>0</span> <span id=PTd2>0</span> <span id=PTd1>0</span></h1>
 
 <chart>
-    <canvas le id="E" width="800px" height="400px" tabindex = "1"></canvas>
+    <canvas le id="E" width="800px" height="400px" tabindeyy = "1"></canvas>
     <draw-canvas-data-set style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(141, 142, 143);'></draw-canvas-data-set>
 </chart>
 
@@ -979,7 +979,7 @@ function $(object){
 <h1 id="TimeGasM3">00:00:00 : 0</h1>
 
 <chartG>
-    <canvas lg id="G" width="800px" height="400px" tabindex = "2"></canvas>
+    <canvas lg id="G" width="800px" height="400px" tabindeyy = "2"></canvas>
     <draw-canvas-data-setG style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(129, 170, 210);'></draw-canvas-data-setG>
 </chartG>
 
