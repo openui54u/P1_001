@@ -193,7 +193,6 @@ function getMinMaxUn(_A){
         min = 0,
         max = 0;
 
-    let _result =[];
 if (_A.length >= 1){
 
     if (Array.isArray(_A[0])){
@@ -218,32 +217,33 @@ if(min == max){
         }
 
 }
+// Unit multiple of 1, 10, 2, 20, 5, 50, 100, 200, 500 etc
+    let un = (max - min) / 10;
 
-    let un = Math.ceil((max - min)/10)
-
-    if ( (max-min) > 100){
-    max = Math.ceil(max / 10) * 10;
-    min = Math.ceil(min / 10) * 10;
-    un = Math.ceil(un / 10) * 10;
-    }else if ( (max-min) > 10){
-        max = Math.ceil(max * 1) / 1;
-        min = Math.ceil(min * 1) / 1;
-        un = Math.ceil(un * 10) / 10;
-    }else if ( (max-min) > 1){
-      un = (Math.ceil( (max - min) *10) ) /10;
-      max = Math.ceil( max * 10) / 10;
-      min = Math.ceil( min * 10) / 10;
-    }else if ( (max-min) > 0){
-        un = (Math.ceil( (max - min) *10) ) / 10;
-        max = Math.ceil( max * 100) / 100;
-        min = Math.ceil( min * 100) / 100;
+    // Units of 100,150, 200 and such
+    if ( un >= 100){
+    max = Math.ceil(max / 1000) * 1000;
+    min = Math.floor(min / 1000) * 1000;
+    un = Math.ceil(un / 100 ) * 100;
+    // Units of 10, 15, 20 etc
+    }else if ( un >= 10){
+        max = Math.ceil(max / 100) * 100;
+        min = Math.floor(min / 100) * 100;
+        un = Math.ceil(un / 10) * 10;
+    // Units of 1 2 5    
+    }else if ( un >= 1){
+      un = (Math.ceil( un / 1) ) * 1;
+      max = Math.ceil( max / 10) * 10;
+      min = Math.floor( min / 10) * 10;
+    // Units of 0.1 0.2 0.5
+    }else if ( un >= 0){
+        un = (Math.ceil( un * 10) ) / 10;
+        max = Math.ceil( max * 1) / 1;
+        min = Math.floor( min * 1) / 1;
     }
     
-    _result.push(min);
-    _result.push(max);
-    _result.push(un);
 
-    return _result;
+    return [min,max,un]
 
 }
 
@@ -253,10 +253,10 @@ function drawLine(){
     if (dataL_Total.length != 0){
 
     let A = [ dataL_Total, datal1, datal2, datal3];           // Combine all arrays
-    let result = getMinMaxUn(A);
-    min = result[0];
-    max = result[1];
-    un  = result[2];  
+    MMU = getMinMaxUn(A);
+    min = MMU[0];
+    max = MMU[1];
+    un  = MMU[2];  
 
     // ys = (w-40)/dataX.length;
     xs = (w-80)/dataX.length;
@@ -293,11 +293,61 @@ function drawLine(){
     return true;
 }
 
+async function tryIP(_ip){
+    let url = 'http://' + _ip + '/api/v1/data';
+
+    const promise1 = new Promise( (res,rej) =>{
+
+            fetch(url);
+                if (response.ok) {
+                    ip = _ip;
+                    console.log(ip);
+                    return true;
+                }else{
+                    // alert("HTTP-Error: " + response.status);
+                    return false
+                }
+
+
+    })
+    const promise2 = new Promise((res, rej) => setTimeout(rej, 2000));
+
+    try { 
+    await Promise.race([promise1, promise2]);
+    } catch (e) {
+    // time out or func failed
+    }
+
+
+//    let response = await fetch(url);
+//                 if (response.ok) {
+//                     ip = _ip;
+//                     console.log(ip);
+//                     return true;
+//                 }else{
+//                     alert("HTTP-Error: " + response.status);
+//                     // return false
+//                 }
+}
 function run(){
 
     button_stop = false;
   
     ip = document.getElementById('IP').value; 
+    if (ip != '' && ip.split('.')[3].includes('*')){
+        // Scan network on last
+        console.log(ip)
+        let _ip = ip;
+       
+
+            for (var i = 0; i < x; i++)  {  
+                _ip.split('.')[3] = i;
+                
+            let response = tryIP(_ip) ;
+
+            }
+
+    }
 
         if (ip != ''){
         Init(); 
@@ -354,6 +404,18 @@ function run(){
         Ctx.clearRect(0, 0, w, h);
         CtxG.clearRect(0,0,wg,hg);
         drawLine();
+        writeNumbers_E( {
+            'active_power_w': dataL_Total[dataL_Total.length-1],
+            'active_power_l1_w': datal1[dataL_Total.length-1],
+            'active_power_l2_w': datal1[dataL_Total.length-1],
+            'active_power_l3_w': datal1[dataL_Total.length-1],
+            'total_gas_m3': dataGasPoint[dataGasPoint.length-1],
+            'total_power_export_t1_kwh' : 1234,
+            'total_power_export_t2_kwh' : 0123,
+            'total_power_import_t1_kwh' : 987,
+            'total_power_import_t2_kwh' : 321
+        }   )
+
 
     }
 }
@@ -434,8 +496,9 @@ async function meter(i){
             
          if(debug){ console.log(hh,mm,ss,_time,_timestamp)};
             // String to screen
-            _string = _string + _time + ' : ' + json.total_gas_m3;
-
+            // _string = _string + _time + ' : ' + json.total_gas_m3;
+            //  _string = 'Time / Date      Gas      Delta l/min      FLow l/min. <br>';
+            _string = _string + _time;
             // Save this unique timestamped Gas result to internal table
             //  dataGasPoint.push([_time, json.total_gas_m3, _timestamp])
 
@@ -444,14 +507,13 @@ async function meter(i){
                  _deltaGas =  Math.floor( ( json.total_gas_m3*100 -  dataGasPoint[dataGasPoint.length-1][1]*100 ) *1000 ) / 100;
                 
                  _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60; // temp constant 
-                 _string = _string + ' Delta:' + _deltaGas + ' liter/' + Math.floor(_min*10)/10 + 'min. ';
+                 _string = _string + '   ' + json.total_gas_m3 + '    ' + _deltaGas + '    ' + Math.floor(_min*10)/10 ;
 
                 if (_min != 0){
                  _usage = Math.round(_deltaGas * 100 / _min) / 100;
                  // console.log(dataGasPoint[dataGasPoint.length-1][2], dataGasPoint[dataGasPoint.length-2][2],_usage, _min)
-                 _string = _string + 'Flow:' + _usage + ' l/min';
+                 _string = _string + '    ' + _usage ;
                 }
-
             }
              _string = _string + '<br>';
              dataGasPoint.push([_time, json.total_gas_m3, _timestamp, _deltaGas, _min, _usage])  
@@ -626,7 +688,7 @@ draw: function() {
     ctx.beginPath()
     // ctx.lineJoin = "round";
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 0;
     let A = [ dataL_Total, datal1, datal2, datal3];
@@ -646,7 +708,7 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 0;// 30
   
@@ -663,7 +725,7 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 0 ;//30
     for(data of datal2){
@@ -678,7 +740,7 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 0 ; //30
     for(data of datal3){
@@ -697,14 +759,14 @@ drawG: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    height = h-30
+    // height = h-30
     line = 30;
             let datag = [];
             for (datagas of dataGasPoint){
                 datag.push(datagas[5]); // datagas[1], datagas[3], 
             }
 
-    const MMU = getMinMaxUn(datag);
+     MMU = getMinMaxUn(datag);
 
     for(data of dataGasPoint){   //dataGas has second info, ...Point has unique points
 
@@ -721,11 +783,11 @@ drawG: function() {
 pointes: function() {
 
     let A = [ dataL_Total, datal1, datal2, datal3];
-    const MMU = getMinMaxUn(A);
+    MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     for (data of dataL_Total) {
         this.points(data, dataL_Total, 'Tot.')
@@ -733,7 +795,7 @@ pointes: function() {
 
     ctx.fillStyle = "#00FF00" //green
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 30
     for (data of datal1) {
@@ -742,7 +804,7 @@ pointes: function() {
 
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 30
     for (data of datal2) {
@@ -751,7 +813,7 @@ pointes: function() {
 
     ctx.fillStyle = "#A020F0" // purple
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 30
     for (data of datal3) {
@@ -775,7 +837,7 @@ pointesGas: function() {
 
     ctx.fillStyle = "#0b95d3"
     x = 60
-    height = h-30
+    // height = h-30
     line = 30
     start = 30;
 
