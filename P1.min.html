@@ -635,10 +635,10 @@ draw: function() {
 
     for(data of dataL_Total){
 
-        test = 30; // offset
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y = 30; // offset
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
 
-        ctx.lineTo(y,test)
+        ctx.lineTo(y,y)
         x += ys
     }
     ctx.stroke()
@@ -653,9 +653,9 @@ draw: function() {
   
     for(data of datal1){
 
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(y,y)
         x += ys
     }
     ctx.stroke()
@@ -668,9 +668,9 @@ draw: function() {
     line = 30
     start = 0 ;//30
     for(data of datal2){
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(y,y)
         x += ys
     }
     ctx.stroke()
@@ -683,9 +683,9 @@ draw: function() {
     line = 30
     start = 0 ; //30
     for(data of datal3){
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(y,y)
         x += ys
     }
     ctx.stroke()
@@ -709,9 +709,9 @@ drawG: function() {
 
     for(data of dataGasPoint){   //dataGas has second info, ...Point has unique points
 
-        test = 30;
-        test += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(y,test)
+        y = 30;
+        y += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(y,y)
         x += ys
     }
 
@@ -764,10 +764,10 @@ pointes: function() {
 },
 points: function(d, dX, f){
 
-test = 30;
-test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f +"," + MMU})
+y = 30;
+y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+chart.circle(y, y)
+dataT.push({ d : Math.round(y) + "," + Math.round(y) +","+Math.round(d) +","+f +"," + MMU})
 y += ys;
 },
 
@@ -796,10 +796,10 @@ pointesGas: function() {
 },
 pointsGas: function(d, dX, f){
 
-test = 30;
-test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(y, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(y) +","+Math.round(d) +","+f + "," + MMU})
+y = 30;
+y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+chart.circle(y, y)
+dataT.push({ d : Math.round(y) + "," + Math.round(y) +","+Math.round(d) +","+f + "," + MMU})
 y += ys ; // Every 5 minutes : should be
 },
 

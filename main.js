@@ -688,7 +688,6 @@ draw: function() {
     ctx.beginPath()
     // ctx.lineJoin = "round";
     x = 60
-    // height = h-30
     line = 30
     start = 0;
     let A = [ dataL_Total, datal1, datal2, datal3];
@@ -696,10 +695,10 @@ draw: function() {
 
     for(data of dataL_Total){
 
-        test = 30; // offset
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y = 30; // offset
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
 
-        ctx.lineTo(x,test)
+        ctx.lineTo(x,y)
         x += xs
     }
     ctx.stroke()
@@ -708,15 +707,14 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    // height = h-30
     line = 30
     start = 0;// 30
   
     for(data of datal1){
 
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(x,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(x,y)
         x += xs
     }
     ctx.stroke()
@@ -725,13 +723,12 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    // height = h-30
     line = 30
     start = 0 ;//30
     for(data of datal2){
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(x,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(x,y)
         x += xs
     }
     ctx.stroke()
@@ -740,13 +737,12 @@ draw: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    // height = h-30
     line = 30
     start = 0 ; //30
     for(data of datal3){
-        test = 30;
-        test += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(x,test)
+        y = 30;
+        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(x,y)
         x += xs
     }
     ctx.stroke()
@@ -759,7 +755,6 @@ drawG: function() {
     ctx.lineWidth = 3
     ctx.beginPath()
     x = 60
-    // height = h-30
     line = 30;
             let datag = [];
             for (datagas of dataGasPoint){
@@ -770,9 +765,9 @@ drawG: function() {
 
     for(data of dataGasPoint){   //dataGas has second info, ...Point has unique points
 
-        test = 30;
-        test += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
-        ctx.lineTo(x,test)
+        y = 30;
+        y += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
+        ctx.lineTo(x,y)
         x += xs
     }
 
@@ -787,7 +782,6 @@ pointes: function() {
 
     ctx.fillStyle = "#0b95d3"
     x = 60
-    // height = h-30
     line = 30
     for (data of dataL_Total) {
         this.points(data, dataL_Total, 'Tot.')
@@ -795,7 +789,6 @@ pointes: function() {
 
     ctx.fillStyle = "#00FF00" //green
     x = 60
-    // height = h-30
     line = 30
     start = 30
     for (data of datal1) {
@@ -804,7 +797,6 @@ pointes: function() {
 
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
     x = 60
-    // height = h-30
     line = 30
     start = 30
     for (data of datal2) {
@@ -813,7 +805,6 @@ pointes: function() {
 
     ctx.fillStyle = "#A020F0" // purple
     x = 60
-    // height = h-30
     line = 30
     start = 30
     for (data of datal3) {
@@ -825,10 +816,10 @@ pointes: function() {
 },
 points: function(d, dX, f){
 
-test = 30;
-test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(x, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU})
+y = 30;
+y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+chart.circle(x, y)
+dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU})
 x += xs;
 },
 
@@ -837,7 +828,6 @@ pointesGas: function() {
 
     ctx.fillStyle = "#0b95d3"
     x = 60
-    // height = h-30
     line = 30
     start = 30;
 
@@ -857,10 +847,10 @@ pointesGas: function() {
 },
 pointsGas: function(d, dX, f){
 
-test = 30;
-test += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
-chart.circle(x, test)
-dataT.push({ d : Math.round(test) + "," + Math.round(x) +","+Math.round(d) +","+f + "," + MMU})
+y = 30;
+y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+chart.circle(x, y)
+dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f + "," + MMU})
 x += xs ; // Every 5 minutes : should be
 },
 
