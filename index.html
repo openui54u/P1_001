@@ -24,6 +24,24 @@
         #P3d3 { font-size: .6em}
         #P3d2 { font-size: .6em}
         #P3d1 { font-size: .6em}
+
+ table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+
+
+
     </style>
 
 </head>
@@ -67,9 +85,16 @@
 <h1>Import T2 (kWh) :<span id=IT2>0</span></h1>
 
 <br>
-<h0>Gas Time (hh:mm:ss/dd-mm-yy) : Gas (m3)     Delta (liter/ x min.)    Flow ( liter/min. ) </h0>
-<div id="GAS">
-<h1 id="TimeGasM3">00:00:00 : 0</h1>
+
+<div style="overflow-x:auto;">
+<table>
+    <tbody id='TimeGasM3'>
+</tbody>
+</table>
+
+</td>
+</div>
+
 
 <chartG>
     <canvas lg id="G" width="800px" height="400px" tabindeyy = "2"></canvas>

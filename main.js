@@ -55,10 +55,13 @@ var MMU; // Minimum Maximum Unit
 const max_seconds = 1500;
 let e_start = {};
 let e_stop  = {};
-let _string = ''; // Gas string accumulated
+let _string = `<tr><th>Time (hh:mm:ss/dd-mm-yy)</th><th>Gas (m3)</th><th>Delta (liter)</th><th>min.</th><th>Flow (liter/min )</th></tr> `; // Gas string accumulated
 let min = 0,
     max = 0;
 
+//let _k = $('#TimeGasM3') ;
+// let _k = object('#TimeGasM3') ;
+var _k;
 
 let iteration = 0;
 
@@ -89,6 +92,7 @@ function Init(){
 }
 
 window.onload = function() {
+
 
      e_start = document.getElementById('Start');
      e_stop  = document.getElementById('Stop');
@@ -222,24 +226,24 @@ if(min == max){
 
     // Units of 100,150, 200 and such
     if ( un >= 100){
-    max = Math.ceil(max / 1000) * 1000;
-    min = Math.floor(min / 1000) * 1000;
-    un = Math.ceil(un / 100 ) * 100;
+        max = Math.ceil(max / 1000) * 1000;
+        min = Math.floor(min / 1000) * 1000;
+        un = Math.ceil(un / 100 ) * 100;
     // Units of 10, 15, 20 etc
     }else if ( un >= 10){
         max = Math.ceil(max / 100) * 100;
         min = Math.floor(min / 100) * 100;
         un = Math.ceil(un / 10) * 10;
     // Units of 1 2 5    
-    }else if ( un >= 1){
-      un = (Math.ceil( un / 1) ) * 1;
+    }else if ( un >= 1){     
       max = Math.ceil( max / 10) * 10;
       min = Math.floor( min / 10) * 10;
+      un = (Math.ceil( un / 1) ) * 1;
     // Units of 0.1 0.2 0.5
-    }else if ( un >= 0){
-        un = (Math.ceil( un * 10) ) / 10;
+    }else if ( un >= 0){      
         max = Math.ceil( max * 1) / 1;
         min = Math.floor( min * 1) / 1;
+        un = (Math.ceil( un * 10) ) / 10;
     }
     
 
@@ -489,16 +493,19 @@ async function meter(i){
         let _min        = 0;
         let _usage      = 0;
 
+       
+
         // When have a first entrie...we want unique entris afterwards
+      
         if (dataGasPoint.length != 0){
         // Is this entry unique now?    
         if (dataGasPoint[dataGasPoint.length-1][2]  != _timestamp || debug == true){
-            
+           // console.log(_string);
          if(debug){ console.log(hh,mm,ss,_time,_timestamp)};
             // String to screen
             // _string = _string + _time + ' : ' + json.total_gas_m3;
             //  _string = 'Time / Date      Gas      Delta l/min      FLow l/min. <br>';
-            _string = _string + _time;
+            _string = _string + '<tr><th>' + _time + '</th>';
             // Save this unique timestamped Gas result to internal table
             //  dataGasPoint.push([_time, json.total_gas_m3, _timestamp])
 
@@ -507,17 +514,19 @@ async function meter(i){
                  _deltaGas =  Math.floor( ( json.total_gas_m3*100 -  dataGasPoint[dataGasPoint.length-1][1]*100 ) *1000 ) / 100;
                 
                  _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60; // temp constant 
-                 _string = _string + '   ' + json.total_gas_m3 + '    ' + _deltaGas + '    ' + Math.floor(_min*10)/10 ;
+                 _string = _string +   '<th>' + json.total_gas_m3 +  '</th><th>' + _deltaGas + '</th><th>' + Math.floor(_min*10)/10  + '</th>';
 
                 if (_min != 0){
                  _usage = Math.round(_deltaGas * 100 / _min) / 100;
                  // console.log(dataGasPoint[dataGasPoint.length-1][2], dataGasPoint[dataGasPoint.length-2][2],_usage, _min)
-                 _string = _string + '    ' + _usage ;
+                 _string = _string + '<th>'  + _usage  +  '</th>';
                 }
             }
-             _string = _string + '<br>';
+             _string = _string + '</tr>';
+
              dataGasPoint.push([_time, json.total_gas_m3, _timestamp, _deltaGas, _min, _usage])  
              dataXG.push(i);
+
             }
             dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed 
 
@@ -525,14 +534,19 @@ async function meter(i){
             dataGas.push([_time, json.total_gas_m3, _timestamp]) ; // perhaps not needed
             dataGasPoint.push([_time, json.total_gas_m3, _timestamp, null, null, null]);
             dataXG.push(i);
-            _string = _time + ' : ' + json.total_gas_m3 + '<br>';
+
+            _string = _string + '<tr><th>' + _time + '<th>' + json.total_gas_m3 + '</th></tr>';
         }
 
         // let _string = '';
         // for (Gas of dataGas){   
         // _string = _string + Gas[0] + ' : ' + Gas[1] + '<br>';
         // }
-        document.getElementById('TimeGasM3').innerHTML = _string;
+        // document.getElementById('TimeGasM3').innerHTML = _string + '</table>';
+        
+        _k = object('#TimeGasM3') ;
+        // console.log(_string);
+        _k.innerHTML = _string ;
 
         //total_gas_m3 G0
     }
@@ -858,8 +872,8 @@ x += xs ; // Every 5 minutes : should be
     x = 60
     y = 30
 
-    let A = [ dataL_Total, datal1, datal2, datal3];
-    let maxArray = A.map(a => Math.max.apply(null, a));
+    // let A = [ dataL_Total, datal1, datal2, datal3];
+    // let maxArray = A.map(a => Math.max.apply(null, a));
     n = max;
 
     for(xdata of dataX){
@@ -948,6 +962,10 @@ circle: function(x,y) {
 }
 
 function $(object){
+    return document.querySelector(object);
+}
+
+function object(object){
     return document.querySelector(object);
 }
 
