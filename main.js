@@ -182,7 +182,7 @@ window.onload = function() {
 }
 
     Init();
-    document.getElementById('IP').value = '192.168.2.45';
+    document.getElementById('IP').value = '192.168.2.*';
 };
 
 async function wrapper(){
@@ -490,12 +490,13 @@ async function meter(i){
 
         // Timestamp in seconds as number    
         // let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
-        let _timestamp = (new Date(Number('20'+ YY),MM,DD,hh,mm,ss,0)).getTime();
-        let _deltaGas   = 0;
-        let _min        = 0;
-        let _usage      = 0;
-
-       
+        let 
+        // _timestamp = (new Date(Number('20'+ YY),MM,DD,hh,mm,ss,00)).getTime();
+            _timestamp = (new Date('20'+ YY + '-' + MM + '-' + DD + 'T' + hh + ':' + mm + ':' + ss)).getTime();
+            if(debug){console.log(  new Date(_timestamp) , _timestamp)};
+            let _deltaGas   = 0;
+            let _min        = 0;
+            let _usage      = 0;
 
         // When have a first entrie...we want unique entris afterwards
       
@@ -515,7 +516,7 @@ async function meter(i){
             if ( dataGasPoint.length > 0){
                  _deltaGas =  Math.floor( ( json.total_gas_m3*100 -  dataGasPoint[dataGasPoint.length-1][1]*100 ) *1000 ) / 100;
                 
-                 _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60; // temp constant 
+                 _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60000; // temp constant 
                  _string = _string +   '<th>' + json.total_gas_m3 +  '</th><th>' + _deltaGas + '</th><th>' + Math.floor(_min*10)/10  + '</th>';
 
                 if (_min != 0){
