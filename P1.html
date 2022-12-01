@@ -37,8 +37,35 @@ th, td {
   padding: 8px;
 }
 
+tr:first-child{background-color: #9cd1e9;}
 tr:nth-child(even){background-color: #f2f2f2}
 
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
 
 
 
@@ -48,7 +75,6 @@ tr:nth-child(even){background-color: #f2f2f2}
 <body>
 
 <script>
-
 
 // Author: Edwin Glaser
 // --------  Only for private usage -----------
@@ -352,60 +378,61 @@ function drawLine(){
 async function tryIP(_ip){
     let url = 'http://' + _ip + '/api/v1/data';
 
-    const promise1 = new Promise( (res,rej) =>{
+    const promise1 = new Promise( (resolve,reject) =>{
+        if(debug){ console.log(url) };
 
-            fetch(url);
-                if (response.ok) {
-                    ip = _ip;
-                    console.log(ip);
-                    return true;
-                }else{
-                    // alert("HTTP-Error: " + response.status);
-                    return false
-                }
-
-
+            fetch(url)
+                 .then(function(response){
+                     if (response.ok){
+                        ip = _ip;
+                            console.log(ip);
+                            if(debug){console.log('Found, url, ip')};
+                            document.getElementById('IP').value = ip;
+                            resolve
+                        }else{
+                                // alert("HTTP-Error: " + response.status);
+                             reject
+                        }
+                //     console.log(response);
+                })
     })
-    const promise2 = new Promise((res, rej) => setTimeout(rej, 2000));
+    const promise2 = new Promise((resolve, reject) => setTimeout(reject, 10));
 
     try { 
     await Promise.race([promise1, promise2]);
     } catch (e) {
     // time out or func failed
+    if(debug){console.log(url, 'failed')};
     }
+    // ERR_CONNECTION_TIMED_OUT
+}
+function scanIP(){
 
+    // Currently only a scan on last .* part of ip4
+    ip = document.getElementById('IP').value; 
+    if (ip != '' && ip.split('.')[3].includes('*')){
+        // Scan network on last
+        // console.log(ip)
+        let _ip = ip;
+       // .1 up to .255 scan the ip range
+            for (var i = 1; i < 256; i++)  {  
+                let _ipArray = _ip.split('.')
+                _ipArray[3] = i;
+                _ip = _ipArray[0] + '.' + _ipArray[1] + '.' + _ipArray[2] + '.' + _ipArray[3]; 
+                if(debug){console.log(_ip)};
+                 tryIP(_ip) ;
 
-//    let response = await fetch(url);
-//                 if (response.ok) {
-//                     ip = _ip;
-//                     console.log(ip);
-//                     return true;
-//                 }else{
-//                     alert("HTTP-Error: " + response.status);
-//                     // return false
-//                 }
+            }
+
+    }
 }
 function run(){
 
     button_stop = false;
   
     ip = document.getElementById('IP').value; 
-    if (ip != '' && ip.split('.')[3].includes('*')){
-        // Scan network on last
-        console.log(ip)
-        let _ip = ip;
-       
 
-            for (var i = 0; i < x; i++)  {  
-                _ip.split('.')[3] = i;
-                
-            let response = tryIP(_ip) ;
-
-            }
-
-    }
-
-        if (ip != ''){
+        if (ip != '' && !ip.includes('*')){
         Init(); 
 
         if(e_start){
@@ -529,18 +556,19 @@ async function meter(i){
         let mm = _stamp.substring(8,10) ;
         let ss = _stamp.substring(10,12);
 
-        let YY = _stamp.substring(4,6) ;
+        let DD = _stamp.substring(4,6) ;
         let MM = _stamp.substring(2,4) ;
-        let DD = _stamp.substring(0,2) ;
+        let YY = _stamp.substring(0,2) ;
     
         let _time = hh + ':' + mm + ':' + ss;
-        let _date = YY + '-' + MM + '-' + DD;
+        let _date = DD + '-' + MM + '-' + YY;
 
         // hh:mm:ss/YY-MM-DD
             _time = _time + '/' + _date;
 
         // Timestamp in seconds as number    
-        let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
+        // let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
+        let _timestamp = (new Date(Number('20'+ YY),MM,DD,hh,mm,ss,0)).getTime();
         let _deltaGas   = 0;
         let _min        = 0;
         let _usage      = 0;
@@ -1029,7 +1057,6 @@ function object(object){
 
 
 
-
 </script>
 
 <div>
@@ -1041,6 +1068,10 @@ function object(object){
     
         <input id="Start" type="button" value = "Start" onclick="run()">
         <input id="Stop" type="button" value = "Stop"  onclick="stop()">
+        <div class="tooltip"> 
+        <input id="Scan" type="button" value = "Scan"  onclick="scanIP()">
+        <span class="tooltiptext">Use IP syntax with 1 wildcard: ###.###.###.*</span>
+       </div>
 
       </div>
 

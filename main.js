@@ -300,60 +300,61 @@ function drawLine(){
 async function tryIP(_ip){
     let url = 'http://' + _ip + '/api/v1/data';
 
-    const promise1 = new Promise( (res,rej) =>{
+    const promise1 = new Promise( (resolve,reject) =>{
+        if(debug){ console.log(url) };
 
-            fetch(url);
-                if (response.ok) {
-                    ip = _ip;
-                    console.log(ip);
-                    return true;
-                }else{
-                    // alert("HTTP-Error: " + response.status);
-                    return false
-                }
-
-
+            fetch(url)
+                 .then(function(response){
+                     if (response.ok){
+                        ip = _ip;
+                            console.log(ip);
+                            if(debug){console.log('Found, url, ip')};
+                            document.getElementById('IP').value = ip;
+                            resolve
+                        }else{
+                                // alert("HTTP-Error: " + response.status);
+                             reject
+                        }
+                //     console.log(response);
+                })
     })
-    const promise2 = new Promise((res, rej) => setTimeout(rej, 2000));
+    const promise2 = new Promise((resolve, reject) => setTimeout(reject, 10));
 
     try { 
     await Promise.race([promise1, promise2]);
     } catch (e) {
     // time out or func failed
+    if(debug){console.log(url, 'failed')};
     }
+    // ERR_CONNECTION_TIMED_OUT
+}
+function scanIP(){
 
+    // Currently only a scan on last .* part of ip4
+    ip = document.getElementById('IP').value; 
+    if (ip != '' && ip.split('.')[3].includes('*')){
+        // Scan network on last
+        // console.log(ip)
+        let _ip = ip;
+       // .1 up to .255 scan the ip range
+            for (var i = 1; i < 256; i++)  {  
+                let _ipArray = _ip.split('.')
+                _ipArray[3] = i;
+                _ip = _ipArray[0] + '.' + _ipArray[1] + '.' + _ipArray[2] + '.' + _ipArray[3]; 
+                if(debug){console.log(_ip)};
+                 tryIP(_ip) ;
 
-//    let response = await fetch(url);
-//                 if (response.ok) {
-//                     ip = _ip;
-//                     console.log(ip);
-//                     return true;
-//                 }else{
-//                     alert("HTTP-Error: " + response.status);
-//                     // return false
-//                 }
+            }
+
+    }
 }
 function run(){
 
     button_stop = false;
   
     ip = document.getElementById('IP').value; 
-    if (ip != '' && ip.split('.')[3].includes('*')){
-        // Scan network on last
-        console.log(ip)
-        let _ip = ip;
-       
 
-            for (var i = 0; i < x; i++)  {  
-                _ip.split('.')[3] = i;
-                
-            let response = tryIP(_ip) ;
-
-            }
-
-    }
-
-        if (ip != ''){
+        if (ip != '' && !ip.includes('*')){
         Init(); 
 
         if(e_start){
@@ -477,18 +478,19 @@ async function meter(i){
         let mm = _stamp.substring(8,10) ;
         let ss = _stamp.substring(10,12);
 
-        let YY = _stamp.substring(4,6) ;
+        let DD = _stamp.substring(4,6) ;
         let MM = _stamp.substring(2,4) ;
-        let DD = _stamp.substring(0,2) ;
+        let YY = _stamp.substring(0,2) ;
     
         let _time = hh + ':' + mm + ':' + ss;
-        let _date = YY + '-' + MM + '-' + DD;
+        let _date = DD + '-' + MM + '-' + YY;
 
         // hh:mm:ss/YY-MM-DD
             _time = _time + '/' + _date;
 
         // Timestamp in seconds as number    
-        let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
+        // let _timestamp  = Number(ss) + Number(60*mm) + Number(3600*hh);
+        let _timestamp = (new Date(Number('20'+ YY),MM,DD,hh,mm,ss,0)).getTime();
         let _deltaGas   = 0;
         let _min        = 0;
         let _usage      = 0;
