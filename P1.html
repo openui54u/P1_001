@@ -76,7 +76,6 @@ tr:nth-child(even){background-color: #f2f2f2}
 
 <script>
 
-
 // Author: Edwin Glaser
 // --------  Only for private usage -----------
 // Date Nov. 2022
@@ -126,17 +125,22 @@ let dataT = [];
 let button_stop = false;
 let tabE = {};
 let tabG = {};
+var zoomStatus = false;
 
 let debug = false;
 
 var MMU; // Minimum Maximum Unit
+var _tabIndeX = 0;
 
-const max_seconds = 1500;
+const max_seconds = 60*60*24 //1500;
 let e_start = {};
 let e_stop  = {};
-let _string = `<tr><th>Time (hh:mm:ss/dd-mm-yy)</th><th>Gas (m3)</th><th>Delta (liter)</th><th>min.</th><th>Flow (liter/min )</th></tr> `; // Gas string accumulated
+let e_scan  = {};
+let _string = `<tr><th>Time (hh:mm:ss/dd-mm-yy)</th><th>Gas (m3)</th><th>DeltaSum(liter)</th><th>Delta (liter)</th><th>min.</th><th>Flow (liter/min )</th></tr> `; // Gas string accumulated
 let min = 0,
     max = 0;
+    let _s = 0;
+    let _e = 0;
 
 //let _k = $('#TimeGasM3') ;
 // let _k = object('#TimeGasM3') ;
@@ -150,6 +154,8 @@ function Init(){
         e_start.style.opacity = 1 };
         if(e_stop && e_stop.style){
         e_stop.style.opacity = 0 };
+        if(e_scan && e_scan.style){
+            e_scan.style.opacity = 1 };
 
         iteration = 0;
         dataX = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -175,12 +181,16 @@ window.onload = function() {
 
      e_start = document.getElementById('Start');
      e_stop  = document.getElementById('Stop');
+     e_scan  = document.getElementById('Scan');
 
      if(e_start){
         e_start.style.opacity = 1 };
 
      if(e_stop){
         e_stop.style.opacity = 0 };
+
+        if(e_scan && e_scan.style){
+            e_scan.style.opacity = 1 };   
 
         c   = document.querySelector("canvas[le]");
         cg  = document.querySelector("canvas[lg]");
@@ -216,7 +226,9 @@ window.onload = function() {
     function mouseMove(e){ 
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
-        let _tabIndeyy = e.currentTarget.attributes[4].nodeValue; // 1  2
+            _tabIndeX = e.currentTarget.attributes[4].nodeValue; // 1  2
+
+        zoomStatus = false;
 
         //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
 
@@ -229,6 +241,7 @@ window.onload = function() {
             dy = Number(dataG[0]); // y axis
 
            let _delta = Math.floor(Number(dataG[4])/ 3);
+           
            if (_delta < 10){ _delta = 10};
               
             if ( ( lx > dx - _delta && lx < dx + _delta  )  && ( ly > dy - _delta && ly < dy + _delta  ) ){
@@ -239,7 +252,7 @@ window.onload = function() {
                         tabE.style.opacity = "1"                      // $('draw-canvas-data-set') 
                         tabE.style.left    = e.layerX + "px"            // $('draw-canvas-data-set') 
                         tabE.style.top     = e.layerY + "px"             // $('draw-canvas-data-set') 
-
+                        // zoomStatus = true;
 
 
                     }else if ( _ID == 'G' && dataG[3] == 'Gas'){
@@ -248,11 +261,13 @@ window.onload = function() {
                         tabG.style.opacity = "1"                     //$('draw-canvas-data-setG')
                         tabG.style.left    = e.layerX + "px"           //$('draw-canvas-data-setG')
                         tabG.style.top     = e.layerY + "px"            //$('draw-canvas-data-setG')
-
+                        // zoomStatus = true;
                     }
+
                 }
                 else{ 
                    // not found...
+                //    zoomStatus = false;
                  }
                 lx = lx -1
                 dx = dx -1
@@ -271,10 +286,31 @@ async function wrapper(){
     console.log('finish');
 };
 
-function getMinMaxUn(_A){
+function getMinMaxUn(AA){
 
         min = 0,
         max = 0;
+        let _A = [];
+        
+        // zoomStatus
+        if (zoomStatus){
+             _s = _tabIndeX - 10;
+            if (_s<0){_s=0}
+             _e = _tabIndeX + 10;
+            if (_e>AA.length-1){
+                _e = AA.length-1
+            }
+            _A[0] = AA[0].slice(_s,_e);
+            _A[1] = AA[1].slice(_s,_e);
+            _A[2] = AA[2].slice(_s,_e);
+            _A[3] = AA[3].slice(_s,_e);
+        }else{
+            _s = 0;
+            if(AA[0]){
+            _e = AA[0].length - 1;}else{ _e = -1}
+            _A = AA;
+        }
+
 
 if (_A.length >= 1){
 
@@ -295,7 +331,7 @@ if(min == max){
             min = _A[0] * 0.999;
             max = _A[0] * 1.001;
         }else{
-            min = _A[0] - 10;
+            min = 0;
             max = _A[0] + 10;
         }
 
@@ -416,9 +452,9 @@ function scanIP(){
         // console.log(ip)
         let _ip = ip;
        // .1 up to .255 scan the ip range
-            for (var i = 1; i < 256; i++)  {  
+            for (var ii = 1; ii < 256; ii++)  {  
                 let _ipArray = _ip.split('.')
-                _ipArray[3] = i;
+                _ipArray[3] = ii;
                 _ip = _ipArray[0] + '.' + _ipArray[1] + '.' + _ipArray[2] + '.' + _ipArray[3]; 
                 if(debug){console.log(_ip)};
                  tryIP(_ip) ;
@@ -438,8 +474,10 @@ function run(){
 
         if(e_start){
             e_start.style.opacity = 0 }; // hide Start
-         if(e_stop){
+        if(e_stop){
             e_stop.style.opacity = 1 };  // Show Stop
+        if(e_scan && e_scan.style){
+            e_scan.style.opacity = 0 }; // hide Scan
 
         dataX = []; 
         dataXG = [];    
@@ -508,9 +546,11 @@ function stop(){
     button_stop = !button_stop;
 
     if(e_start){
-        e_start.style.opacity = 1 };
+        e_start.style.opacity = 1 }; // Show Start
      if(e_stop){
-        e_stop.style.opacity = 0 };
+        e_stop.style.opacity = 0 }; // Hide Stop
+    if(e_scan && e_scan.style){
+        e_scan.style.opacity = 1 }; // Show Scan
 
 }
 
@@ -578,12 +618,16 @@ async function meter(i){
             let _usage      = 0;
 
         // When have a first entrie...we want unique entris afterwards
-      
+  
         if (dataGasPoint.length != 0){
         // Is this entry unique now?    
         if (dataGasPoint[dataGasPoint.length-1][2]  != _timestamp || debug == true){
            // console.log(_string);
          if(debug){ console.log(hh,mm,ss,_time,_timestamp)};
+
+         let _startGas = dataGasPoint[0][1];
+         let _deltaSum = ( ( Math.floor( json.total_gas_m3 *1000) - Math.floor(_startGas * 1000) ) * 1000 ) / 1000;
+ 
             // String to screen
             // _string = _string + _time + ' : ' + json.total_gas_m3;
             //  _string = 'Time / Date      Gas      Delta l/min      FLow l/min. <br>';
@@ -593,10 +637,10 @@ async function meter(i){
 
             // When we have 2 or more entries saved...we can make some calculations
             if ( dataGasPoint.length > 0){
-                 _deltaGas =  Math.floor( ( json.total_gas_m3*100 -  dataGasPoint[dataGasPoint.length-1][1]*100 ) *1000 ) / 100;
+                 _deltaGas =  Math.floor( ( json.total_gas_m3*1000 -  dataGasPoint[dataGasPoint.length-1][1]*1000 ) *1000 ) / 1000;
                 
                  _min    = (_timestamp - dataGasPoint[dataGasPoint.length-1][2]) /60000; // temp constant 
-                 _string = _string +   '<th>' + json.total_gas_m3 +  '</th><th>' + _deltaGas + '</th><th>' + Math.floor(_min*10)/10  + '</th>';
+                 _string = _string +   '<th>' + json.total_gas_m3 +  '</th><th>' + _deltaSum + '</th><th>' + _deltaGas + '</th><th>' + Math.floor(_min*10)/10  + '</th>';
 
                 if (_min != 0){
                  _usage = Math.round(_deltaGas * 100 / _min) / 100;
@@ -786,13 +830,13 @@ draw: function() {
     x = 60
     line = 30
     start = 0;
-    let A = [ dataL_Total, datal1, datal2, datal3];
-    MMU = getMinMaxUn(A);
+    // let A = [ dataL_Total, datal1, datal2, datal3];
+    // MMU = getMinMaxUn(A);
 
     for(data of dataL_Total){
 
         y = 30; // offset
-        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y +=   ( ( MMU[1] - data ) / MMU[2] ) * line  ;
 
         ctx.lineTo(x,y)
         x += xs
@@ -809,7 +853,7 @@ draw: function() {
     for(data of datal1){
 
         y = 30;
-        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y += ( ( MMU[1] - data ) / MMU[2] ) * line ;
         ctx.lineTo(x,y)
         x += xs
     }
@@ -823,7 +867,7 @@ draw: function() {
     start = 0 ;//30
     for(data of datal2){
         y = 30;
-        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y += ( ( MMU[1] - data ) / MMU[2] ) * line  ;
         ctx.lineTo(x,y)
         x += xs
     }
@@ -837,7 +881,7 @@ draw: function() {
     start = 0 ; //30
     for(data of datal3){
         y = 30;
-        y += ( 10 - ( data - MMU[0] ) / MMU[2] ) * line ;
+        y += ( ( MMU[1] - data ) / MMU[2] ) * line  ;
         ctx.lineTo(x,y)
         x += xs
     }
@@ -862,7 +906,8 @@ drawG: function() {
     for(data of dataGasPoint){   //dataGas has second info, ...Point has unique points
 
         y = 30;
-        y += ( 10 - ( data[5] - MMU[0] ) / MMU[2] ) * line ;
+        // Diference between max and datapoint / unit(1/10 of height) and pixels/unit
+        y +=  ( ( MMU[1] - data[5] ) / MMU[2] ) * line ;
         ctx.lineTo(x,y)
         x += xs
     }
@@ -873,8 +918,8 @@ drawG: function() {
 
 pointes: function() {
 
-    let A = [ dataL_Total, datal1, datal2, datal3];
-    MMU = getMinMaxUn(A);
+    // let A = [ dataL_Total, datal1, datal2, datal3];
+    // MMU = getMinMaxUn(A);
 
     ctx.fillStyle = "#0b95d3"
     x = 60
@@ -913,7 +958,7 @@ pointes: function() {
 points: function(d, dX, f){
 
 y = 30;
-y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+y += (( MMU[1] - data ) / MMU[2] ) * line ;
 chart.circle(x, y)
 dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU})
 x += xs;
@@ -927,11 +972,11 @@ pointesGas: function() {
     line = 30
     start = 30;
 
-    let datag = [];
-    for (datagas of dataGasPoint){
-        datag.push(datagas[5]);
-    }
-    MMU = getMinMaxUn(datag);
+    // let datag = [];
+    // for (datagas of dataGasPoint){
+    //     datag.push(datagas[5]);
+    // }
+    // MMU = getMinMaxUn(datag);
 
     for (data of dataGasPoint) {
         this.pointsGas(data[5], dataGasPoint, 'Gas')
@@ -944,9 +989,9 @@ pointesGas: function() {
 pointsGas: function(d, dX, f){
 
 y = 30;
-y += ( 10 - ( d - MMU[0] ) / MMU[2] ) * line ;
+y += ( ( MMU[1] - d ) / MMU[2] ) * line ;
 chart.circle(x, y)
-dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f + "," + MMU})
+dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+ Math.round(d * 10)/10 +","+f + "," + MMU})
 x += xs ; // Every 5 minutes : should be
 },
 
@@ -958,25 +1003,31 @@ x += xs ; // Every 5 minutes : should be
     // let maxArray = A.map(a => Math.max.apply(null, a));
     n = max;
 
-    for(xdata of dataX){
+    // let _length = dataX.length;
+       let _length = _e - _s + 1;
+
+    // for(xdata of dataX){
+        for (let ix = _s; ix < _e; ix++) { 
+            const xdata = dataX[ix];
+
         ctx.font = "12px Arial";
-        if (dataX.length > 300){
+        if (_length > 300){
             ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
             x += xs*60;
         }else
-        if (dataX.length > 140){
+        if (_length > 140){
             ctx.fillText(xdata*20, x +20*xs -xs ,h-10); 
             x += xs*20;
         }else
-        if (dataX.length > 50){
+        if (_length > 50){
             ctx.fillText(xdata*10, x +10*xs -xs ,h-10); 
             x += xs*10;
         }else
-        if (dataX.length > 20){
+        if (_length > 20){
             ctx.fillText(xdata*5, x +5*xs - xs ,h-10); 
             x += xs*5;
         }else 
-        if (dataX.length > 10){
+        if (_length > 10){
             ctx.fillText(xdata*2, x +2*xs - xs ,h-10); 
             x += xs*2;
         }else{
