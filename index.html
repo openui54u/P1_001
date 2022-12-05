@@ -67,6 +67,46 @@ tr:nth-child(even){background-color: #f2f2f2}
   visibility: visible;
 }
 
+.slidecontainer {
+    left: 60px;
+    position: relative;
+    width: 740px; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
 
 
     </style>
@@ -104,8 +144,14 @@ tr:nth-child(even){background-color: #f2f2f2}
 <h1>Fase 3 (W):<span id=P3>0</span> <span id=P3d3>0</span> <span id=P3d2>0</span> <span id=P3d1>0</span></h1>
 <h1>Totaal (W):<span id=PT>0</span> <span id=PTd3>0</span> <span id=PTd2>0</span> <span id=PTd1>0</span></h1>
 
+<input id="Zoom" type="button" value = "Zoom"  onclick="toggleZoom()">
+<div id="rangeValue"></div>
+<div class="slidecontainer">
+    <input type="range" min="1" max="100" value="100" class="slider" id="myRange">
+</div>
+ 
 <chart>
-    <canvas le id="E" width="800px" height="400px" tabindeyy = "1"></canvas>
+    <canvas le id="E" width="800px" height="420px" tabindex = "1"></canvas>
     <draw-canvas-data-set style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(141, 142, 143);'></draw-canvas-data-set>
 </chart>
 
@@ -128,7 +174,7 @@ tr:nth-child(even){background-color: #f2f2f2}
 
 
 <chartG>
-    <canvas lg id="G" width="800px" height="400px" tabindeyy = "2"></canvas>
+    <canvas lg id="G" width="800px" height="420px" tabindex = "2"></canvas>
     <draw-canvas-data-setG style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(129, 170, 210);'></draw-canvas-data-setG>
 </chartG>
 

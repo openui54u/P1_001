@@ -52,7 +52,7 @@ var zoomStatus = false;
 let debug = false;
 
 var MMU; // Minimum Maximum Unit
-var _tabIndeX = 0;
+var tabIndexCanvas = 0;
 
 const max_seconds = 60*60*24 //1500;
 let e_start = {};
@@ -148,7 +148,7 @@ window.onload = function() {
     function mouseMove(e){ 
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
-            _tabIndeX = e.currentTarget.attributes[4].nodeValue; // 1  2
+            tabIndexCanvas = e.currentTarget.attributes[4].nodeValue; // 1  2
 
         zoomStatus = false;
 
@@ -216,9 +216,9 @@ function getMinMaxUn(AA){
         
         // zoomStatus
         if (zoomStatus){
-             _s = _tabIndeX - 10;
+             _s = tabIndexCanvas - 10;
             if (_s<0){_s=0}
-             _e = _tabIndeX + 10;
+             _e = tabIndexCanvas + 10;
             if (_e>AA.length-1){
                 _e = AA.length-1
             }
