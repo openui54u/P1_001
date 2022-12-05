@@ -67,6 +67,46 @@ tr:nth-child(even){background-color: #f2f2f2}
   visibility: visible;
 }
 
+.slidecontainer {
+    left: 60px;
+    position: relative;
+    width: 740px; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
 
 
     </style>
@@ -119,18 +159,21 @@ let dataX  = [],        // X-axis
     datal3 = [];        // Phase 3
 let dataGas = [],       // Gas Every call
     dataGasPoint = [];  // Gas Every Unique Measurement
-let un = 0;             // Unit : Value per 30 pixels 
+var un = 0;             // Unit : Value per 30 pixels 
 let xs = 0;
 let dataT = [];
-let button_stop = false;
+let button_stop = true; // is stopped so start is showing
 let tabE = {};
 let tabG = {};
 var zoomStatus = false;
-
+var sliderPercentage = 1; // [percentage/100]
 let debug = false;
 
 var MMU; // Minimum Maximum Unit
-var tabIndexCanvas = 0;
+var tabIndexCanvas = 0; // canvas index
+var tabIndeX_dataT = 0; // tab index of E or G
+
+let zoomPoints = 10;
 
 const max_seconds = 60*60*24 //1500;
 let e_start = {};
@@ -141,6 +184,32 @@ let min = 0,
     max = 0;
     let _s = 0;
     let _e = 0;
+    let _index = 0;
+    let _length = 0;
+
+    var gVar = {
+        s: 0,
+        e: 0,
+        zoomStatus: false,
+
+      get zoom(){
+        if(s== undefined){
+            s = 0
+        }
+        if(e==undefined){
+            e = -1
+        }
+        if(zoomStatus == undefined){
+            zoomStatus = false
+        }
+        return {s,e, zoomStatus};
+      },
+      set zoom(o){
+        s = o.s;
+        e = o.e;
+        zoomStatus = o.zoomStatus;
+      }
+    }
 
 //let _k = $('#TimeGasM3') ;
 // let _k = object('#TimeGasM3') ;
@@ -149,6 +218,28 @@ var _k;
 let iteration = 0;
 
 function Init(){
+
+
+var slider = document.getElementById("myRange");
+// var output = document.getElementById("demo");
+// output.innerHTML = slider.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+//   output.innerHTML = this.value;
+//  tabIndeX_dataT
+     sliderPercentage =  Number( this.value / 100 );
+    _e = Math.floor(sliderPercentage * dataX.length);
+    if(_e < 10){ _e = 10};
+    document.getElementById("rangeValue").innerHTML = _e;
+    gVar.zoom = {_s, _e, zoomStatus}
+}
+
+
+    _s = 0;
+    _e = 0;
+    zoomStatus = false;
+    gVar.zoom = {s:_s, e:_e, zoomStatus: zoomStatus};
 
         if(e_start && e_start.style){
         e_start.style.opacity = 1 };
@@ -205,6 +296,8 @@ window.onload = function() {
         hg   = cg.height;
         wg   = cg.width ;
 
+        zoomPoints = Math.floor( ( c.width / 30 ) ) - 2;
+
         // Canvas Context
         Ctx  = c.getContext('2d');
         CtxG = cg.getContext('2d');
@@ -223,16 +316,50 @@ window.onload = function() {
             mouseMove(e) 
         };
 
+
+
     function mouseMove(e){ 
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
             tabIndexCanvas = e.currentTarget.attributes[4].nodeValue; // 1  2
+            //console.log(tabIndexCanvas);
 
-        zoomStatus = false;
-
+            // if(button_stop && Number(e.offsetY)< 10) {
+            // First time zooming:
+            // if ( zoomStatus && Number(e.offsetY)< 10) {
+            //     zoomStatus = false;
+            //     Ctx.clearRect(0, 0, w, h);
+            //     CtxG.clearRect(0,0,wg,hg);
+            //     // drawLine();
+            // }else 
+            // if ( !zoomStatus && Number(e.offsetY)< 10) {
+            //     Ctx.clearRect(0, 0, w, h);
+            //     CtxG.clearRect(0,0,wg,hg);
+                // zoomStatus = true;
+            //     drawLine();
+            // }
+  
+    
+        // zoomStatus = false;
         //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
 
-    for(let data of dataT){
+         _index = 0;
+  
+        _s = gVar.zoom.s 
+        _e = gVar.zoom.e;
+        zoomStatus = gVar.zoom.zoomStatus;
+
+        if (_e == -1 || isNaN(_e)){
+            _s = 0;
+            _e = dataX.length ;
+        }
+        gVar.zoom = {s:_s,e:_e, zoomStatus:zoomStatus};     
+        
+//   T has 4* the amount of data in
+  for(let data of dataT){
+        // for (let ix = _s; ix < (_e * 4); ix++) { 
+            // const data = dataT[ix];
+        
         for (const [key, value] of Object.entries(data)) {
             let dataG = value.split(","),
             lx = Number(e.offsetX), // - 10,
@@ -252,7 +379,15 @@ window.onload = function() {
                         tabE.style.opacity = "1"                      // $('draw-canvas-data-set') 
                         tabE.style.left    = e.layerX + "px"            // $('draw-canvas-data-set') 
                         tabE.style.top     = e.layerY + "px"             // $('draw-canvas-data-set') 
+                    //    if(button_stop){
                         // zoomStatus = true;
+                        // Ctx.clearRect(0, 0, w, h);
+                        // CtxG.clearRect(0,0,wg,hg);
+                        // drawLine();
+                    // };
+                       if(debug){ console.log(_index, Number(dataG[7])) };
+                       tabIndeX_dataT = Number(dataG[7]);
+
 
 
                     }else if ( _ID == 'G' && dataG[3] == 'Gas'){
@@ -261,7 +396,9 @@ window.onload = function() {
                         tabG.style.opacity = "1"                     //$('draw-canvas-data-setG')
                         tabG.style.left    = e.layerX + "px"           //$('draw-canvas-data-setG')
                         tabG.style.top     = e.layerY + "px"            //$('draw-canvas-data-setG')
-                        // zoomStatus = true;
+                        // if(button_stop){
+                        //   zoomStatus = true
+                        // };
                     }
 
                 }
@@ -271,8 +408,24 @@ window.onload = function() {
                  }
                 lx = lx -1
                 dx = dx -1
+
+                // if(button_stop && zoomStatus){
+                // if (zoomStatus){
+                //     Ctx.clearRect(0, 0, w, h);
+                //     CtxG.clearRect(0,0,wg,hg);
+                //     drawLine();
+                //     console.log('refresh');
+                //     // zoomStatus = false;
+                //     // drawLine();
+                // };
+                // zoomStatus = false;
+
         }
+        _index++;
     }
+
+
+
 }
 
     Init();
@@ -283,33 +436,99 @@ async function wrapper(){
     console.log('start');
     await waitInterval( meter, 999);
     console.log(iteration);
+    button_stop = true;
     console.log('finish');
 };
+
+function toggleZoom(){
+    zoomStatus = gVar.zoom.zoomStatus;
+    zoomStatus = !zoomStatus;
+
+    let _buttonZoom = document.getElementById("Zoom");
+    if(zoomStatus){
+    _buttonZoom.style.backgroundColor = "lightblue";
+    }else{
+        _buttonZoom.style.backgroundColor = "white";
+    }
+
+
+
+    if(gVar.zoom.zoomStatus){
+        _e =  Math.floor( dataX.length * sliderPercentage );
+        if(_e < 10){ _e = 10};
+        document.getElementById("rangeValue").innerHTML = _e;
+        _s = _e - zoomPoints; //- 10;
+        if (_s< 0){
+            _s = 0;
+        }
+        // Set to global scope
+        // gVar.zoom.e = _s;
+        // gVar.zoom.s = _e;
+        gVar.zoom = {s:_s,e:_e, zoomStatus:zoomStatus};
+
+    //     Ctx.clearRect(0, 0, w, h);
+    //     CtxG.clearRect(0,0,wg,hg);
+    // drawLine();
+    }else{
+        let _r = {s:0, e:dataX.length, zoomStatus:zoomStatus};
+        gVar.zoom = _r;
+        if(sliderPercentage == 1){
+            document.getElementById("rangeValue").innerHTML = gVar.zoom.e;
+        }
+    }
+}
 
 function getMinMaxUn(AA){
 
         min = 0,
         max = 0;
         let _A = [];
+
+        zoomStatus = gVar.zoom.zoomStatus;
+        if(zoomStatus){
+        _s = gVar.zoom.s;
+        _e = gVar.zoom.e;
+        document.getElementById("rangeValue").innerHTML = _e;
+        }else{
+         _s = 0;
+         _e = dataX.length;
+         if(sliderPercentage == 1){
+            document.getElementById("rangeValue").innerHTML = _e }
+        }
         
         // zoomStatus
-        if (zoomStatus){
-             _s = tabIndexCanvas - 10;
-            if (_s<0){_s=0}
-             _e = tabIndexCanvas + 10;
-            if (_e>AA.length-1){
-                _e = AA.length-1
+        if (zoomStatus && AA[0] != null ){
+            //  _s = tabIndeX_dataT - 5;
+            // if (_s<0){_s=0}
+            //  _e = tabIndeX_dataT + 5;
+            if (_e > AA[0].length){
+                _e = AA[0].length
+                _s = AA[0].length - 10
             }
+            // if (_s==0){_e = tabIndeX_dataT + 10}
+            if (_s<0){_s=0 ; _e = _s + zoomPoints}  //+10
+            if (_e > AA[0].length){
+                _e = AA[0].length;
+            }
+            _A[0] = []; _A[1] = []; _A[2] = []; _A[3] = [];
+            if (AA[0] != null && AA[0] != undefined && AA[0].length > 1){
             _A[0] = AA[0].slice(_s,_e);
             _A[1] = AA[1].slice(_s,_e);
             _A[2] = AA[2].slice(_s,_e);
             _A[3] = AA[3].slice(_s,_e);
+            }else{
+                _A = AA;
+            }
         }else{
             _s = 0;
             if(AA[0]){
-            _e = AA[0].length - 1;}else{ _e = -1}
+            _e = AA[0].length }else{
+                //  _e = -1
+                }
             _A = AA;
         }
+
+        gVar.zoom = {s:_s, e:_e, zoomStatus:zoomStatus};
 
 
 if (_A.length >= 1){
@@ -327,17 +546,17 @@ if (_A.length >= 1){
 }
 if(min == max){
 
-        if ( (max-min) > 10){
+        if ( (max-min) > 10){  //10
             min = _A[0] * 0.999;
             max = _A[0] * 1.001;
         }else{
             min = 0;
-            max = _A[0] + 10;
+            max = _A[0] + 10 ;//+ 10;
         }
 
 }
 // Unit multiple of 1, 10, 2, 20, 5, 50, 100, 200, 500 etc
-    let un = (max - min) / 10;
+        un = (max - min) / 10;
 
     // Units of 100,150, 200 and such
     if ( un >= 100){
@@ -377,8 +596,18 @@ function drawLine(){
     max = MMU[1];
     un  = MMU[2];  
 
+   _s =  gVar.zoom.s;
+   _e =  gVar.zoom.e; 
+   zoomStatus = gVar.zoom.zoomStatus;
+
     // ys = (w-40)/dataX.length;
     xs = (w-80)/dataX.length;
+
+    _length = _e - _s ;
+    if(zoomStatus){
+        xs = (w-80)/_length;
+    }
+
     dataT = [];
     chart.setCtx(Ctx);
     chart.chartLine()
@@ -433,7 +662,7 @@ async function tryIP(_ip){
                 //     console.log(response);
                 })
     })
-    const promise2 = new Promise((resolve, reject) => setTimeout(reject, 10));
+    const promise2 = new Promise((resolve, reject) => setTimeout(reject, 100));
 
     try { 
     await Promise.race([promise1, promise2]);
@@ -493,13 +722,13 @@ function run(){
         
     }else{
         // fake numbers insert
-        dataX = [1,2,3,4,5,6,7,8,9,10];  // x-axis :) 
+        dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];  // x-axis :) 
         dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
 
-        dataL_Total = [1000,10010,1001,980,1023,899,455,1200,300,10]; // y-axis values Totals
-        datal1 = [151,242,353,264,115,36,645,374,493,2];
-        datal2 = [12,14,15,33,22,44,77,22,33,34];
-        datal3 = [34,866,333,700,600,345,333,1111,233,1];
+        dataL_Total = [1000,10010,1001,980,1023,899,455,1200,300,10,232,432,244,666]; // y-axis values Totals
+        datal1 = [151,242,353,264,115,36,645,374,493,2,55,3,77,55];
+        datal2 = [12,14,15,33,22,44,77,22,33,34,33,55,22,33,44];
+        datal3 = [34,866,333,700,600,345,333,1111,233,1,2,3,4,5];
 
         dataGas = [ 
         ['21:10:06/22-11-22', 3037.961, 76206],
@@ -526,6 +755,7 @@ function run(){
         Ctx.clearRect(0, 0, w, h);
         CtxG.clearRect(0,0,wg,hg);
         drawLine();
+        button_stop = true;
         writeNumbers_E( {
             'active_power_w': dataL_Total[dataL_Total.length-1],
             'active_power_l1_w': datal1[dataL_Total.length-1],
@@ -543,7 +773,7 @@ function run(){
 }
 
 function stop(){
-    button_stop = !button_stop;
+    button_stop = true;
 
     if(e_start){
         e_start.style.opacity = 1 }; // Show Start
@@ -582,10 +812,31 @@ async function meter(i){
     // Electric
       writeNumbers_E(json);
 
-    Ctx.clearRect(0, 0, w, h);
-    CtxG.clearRect(0,0,wg,hg);
+    if(!zoomStatus){
+        Ctx.clearRect(0, 0, w, h);
+        CtxG.clearRect(0,0,wg,hg);
+        drawLine();
+        
+    }else{
+        if(debug){console.log('pause')}
 
-    drawLine();
+        if(zoomStatus){
+            _e =  Math.floor( dataX.length * sliderPercentage ) ;
+            if(_e < 10){ _e = 10};
+            document.getElementById("rangeValue").innerHTML = _e;
+            _s = _e - zoomPoints; //10
+            if (_s< 0){
+                _s = 0;
+            }
+            Ctx.clearRect(0, 0, w, h);
+            CtxG.clearRect(0,0,wg,hg);
+            gVar.zoom = {s:_s,e:_e, zoomStatus: zoomStatus};
+            drawLine();
+        }else{
+            if( zoomStatus == 1 ){
+                document.getElementById("rangeValue").innerHTML = _e }
+        }
+    }
 
     // Gas details
     if(json.gas_timestamp){
@@ -830,10 +1081,12 @@ draw: function() {
     x = 60
     line = 30
     start = 0;
-    // let A = [ dataL_Total, datal1, datal2, datal3];
-    // MMU = getMinMaxUn(A);
+    let A = [ dataL_Total, datal1, datal2, datal3];
+    MMU = getMinMaxUn(A);
 
-    for(data of dataL_Total){
+    // for(data of dataL_Total){
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = dataL_Total[ix];
 
         y = 30; // offset
         y +=   ( ( MMU[1] - data ) / MMU[2] ) * line  ;
@@ -850,7 +1103,9 @@ draw: function() {
     line = 30
     start = 0;// 30
   
-    for(data of datal1){
+    // for(data of datal1){
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal1[ix];
 
         y = 30;
         y += ( ( MMU[1] - data ) / MMU[2] ) * line ;
@@ -865,7 +1120,9 @@ draw: function() {
     x = 60
     line = 30
     start = 0 ;//30
-    for(data of datal2){
+    // for(data of datal2){
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal2[ix];
         y = 30;
         y += ( ( MMU[1] - data ) / MMU[2] ) * line  ;
         ctx.lineTo(x,y)
@@ -879,7 +1136,9 @@ draw: function() {
     x = 60
     line = 30
     start = 0 ; //30
-    for(data of datal3){
+    // for(data of datal3){
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal3[ix];
         y = 30;
         y += ( ( MMU[1] - data ) / MMU[2] ) * line  ;
         ctx.lineTo(x,y)
@@ -920,47 +1179,64 @@ pointes: function() {
 
     // let A = [ dataL_Total, datal1, datal2, datal3];
     // MMU = getMinMaxUn(A);
-
+ let _indexL = 0;
     ctx.fillStyle = "#0b95d3"
     x = 60
     line = 30
-    for (data of dataL_Total) {
-        this.points(data, dataL_Total, 'Tot.')
+    // for (data of dataL_Total) {
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = dataL_Total[ix];
+
+        this.points(data, dataL_Total, 'Tot.', _indexL);
+        _indexL++;
     }
 
+     _indexL = 0;
     ctx.fillStyle = "#00FF00" //green
     x = 60
     line = 30
     start = 30
-    for (data of datal1) {
-        this.points(data, datal1, 'l1')
+    // for (data of datal1) {
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal1[ix];
+
+        this.points(data, datal1, 'l1', _indexL)
+        _indexL++;
     }
 
+    _indexL = 0;
     ctx.fillStyle = "#d6d610" //"#FFFF00" //yellow
     x = 60
     line = 30
     start = 30
-    for (data of datal2) {
-        this.points(data, datal2, 'l2')
+    // for (data of datal2) {
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal2[ix];
+        this.points(data, datal2, 'l2', _indexL)
+        _indexL++;
     }
 
+    _indexL = 0;
     ctx.fillStyle = "#A020F0" // purple
     x = 60
     line = 30
     start = 30
-    for (data of datal3) {
-        this.points(data, datal3 ,'l3')
+    // for (data of datal3) {
+        for (let ix = _s; ix < _e; ix++) { 
+            const data = datal3[ix];
+        this.points(data, datal3 ,'l3', _indexL)
+        _indexL++;
     }
     ctx.fillStyle = "#00000F" 
 
     ctx.stroke()
 },
-points: function(d, dX, f){
+points: function(d, dX, f, _indX){
 
 y = 30;
-y += (( MMU[1] - data ) / MMU[2] ) * line ;
+y += (( MMU[1] - d ) / MMU[2] ) * line ;
 chart.circle(x, y)
-dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU})
+dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+Math.round(d) +","+f +"," + MMU + ',' + Number(_indX)})
 x += xs;
 },
 
@@ -978,20 +1254,22 @@ pointesGas: function() {
     // }
     // MMU = getMinMaxUn(datag);
 
+    let _indexG = 0;
     for (data of dataGasPoint) {
-        this.pointsGas(data[5], dataGasPoint, 'Gas')
+        this.pointsGas(data[5], dataGasPoint, 'Gas', _indexG)
+        _indexG++;
     }
 
     ctx.fillStyle = "#00000F" 
 
     ctx.stroke()
 },
-pointsGas: function(d, dX, f){
+pointsGas: function(d, dX, f, _indG){
 
 y = 30;
 y += ( ( MMU[1] - d ) / MMU[2] ) * line ;
 chart.circle(x, y)
-dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+ Math.round(d * 10)/10 +","+f + "," + MMU})
+dataT.push({ d : Math.round(y) + "," + Math.round(x) +","+ Math.round(d * 10)/10 +","+f + "," + MMU + ',' + Number(_indG)})
 x += xs ; // Every 5 minutes : should be
 },
 
@@ -1004,13 +1282,18 @@ x += xs ; // Every 5 minutes : should be
     n = max;
 
     // let _length = dataX.length;
-       let _length = _e - _s + 1;
+     _length = _e - _s ;
 
     // for(xdata of dataX){
         for (let ix = _s; ix < _e; ix++) { 
             const xdata = dataX[ix];
 
         ctx.font = "12px Arial";
+        if(zoomStatus){
+            ctx.fillText(xdata, x,h-10);
+            x += xs;
+        }else{
+
         if (_length > 300){
             ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
             x += xs*60;
@@ -1034,6 +1317,7 @@ x += xs ; // Every 5 minutes : should be
         ctx.fillText(xdata, x,h-10);
         x += xs;
         }
+    }
         
     }
     while(y < h-30){
@@ -1051,6 +1335,9 @@ dataGas: function() {
     n = max;
 
     for(xdata of dataXG){
+        // for (let ix = _s; ix < _e; ix++) { 
+        //     const xdata = dataXG[ix];
+
         ctx.font = "12px Arial";
         if (dataXG.length > 300){
             ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
@@ -1109,6 +1396,7 @@ function object(object){
 
 
 
+
 </script>
 
 <div>
@@ -1139,8 +1427,14 @@ function object(object){
 <h1>Fase 3 (W):<span id=P3>0</span> <span id=P3d3>0</span> <span id=P3d2>0</span> <span id=P3d1>0</span></h1>
 <h1>Totaal (W):<span id=PT>0</span> <span id=PTd3>0</span> <span id=PTd2>0</span> <span id=PTd1>0</span></h1>
 
+<input id="Zoom" type="button" value = "Zoom"  onclick="toggleZoom()">
+<div id="rangeValue"></div>
+<div class="slidecontainer">
+    <input type="range" min="1" max="100" value="100" class="slider" id="myRange">
+</div>
+ 
 <chart>
-    <canvas le id="E" width="800px" height="400px" tabindeyy = "1"></canvas>
+    <canvas le id="E" width="800px" height="420px" tabindex = "1"></canvas>
     <draw-canvas-data-set style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(141, 142, 143);'></draw-canvas-data-set>
 </chart>
 
@@ -1163,7 +1457,7 @@ function object(object){
 
 
 <chartG>
-    <canvas lg id="G" width="800px" height="400px" tabindeyy = "2"></canvas>
+    <canvas lg id="G" width="800px" height="420px" tabindex = "2"></canvas>
     <draw-canvas-data-setG style='width: fit-content; height: fit-content; padding: 5px 15px; margin: 5px; position: absolute; left: 618px; top: 160px; opacity: 0; transition: all 0.5s ease 0s; color: rgb(255, 255, 255); background: rgb(129, 170, 210);'></draw-canvas-data-setG>
 </chartG>
 
