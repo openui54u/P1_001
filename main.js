@@ -26,7 +26,39 @@
 // Credits o.a.:
 // Linechart source based on:  https://codepen.io/yahiaelbnna/pen/KKgLOro
 
-var ip;
+
+
+
+// {ip}/api
+// P1
+//{"product_type":"HWE-P1","product_name":"P1 meter","serial":"3c39e72ea574","firmware_version":"3.02","api_version":"v1"}
+
+// Socket
+// {"product_type":"HWE-SKT","product_name":"Energy Socket","serial":"<serial>","firmware_version":"3.02","api_version":"v1"}
+
+// Kwh meter
+// {"product_type":"SDM230-wifi","product_name":"KWh meter","serial":"<serial>","firmware_version":"2.11","api_version":"v1"}
+
+// Watermeter
+// {"product_type":"HWE-WTR","product_name":"Watermeter","serial":"<serial>","firmware_version":"1.17","api_version":"v1"}
+
+//{ip}/api/v1/data
+// P1
+
+// Energy socket:
+// {"wifi_ssid":"xxxxx","wifi_strength":54,"total_power_import_t1_kwh":12.345,"total_power_export_t1_kwh":456.789,"active_power_w":0.987,"active_power_l1_w":0.901}
+
+// Kwh meter:
+// {"wifi_ssid":"xxxx","wifi_strength":98,"total_power_import_t1_kwh":12.345,"total_power_export_t1_kwh":3456.789,"active_power_w":6.543,"active_power_l1_w":5.432}
+
+// Watermeter:
+// {"wifi_ssid":"xxxxx ","wifi_strength":72,"total_liter_m3":21.012,"active_liter_lpm":0}
+
+
+
+
+var ip = {};
+// var ip_W1;
 
 let c = {};
 let h = 0;
@@ -48,7 +80,8 @@ let button_stop = true; // is stopped so start is showing
 let tabE = {};
 let tabG = {};
 var zoomStatus = false;
-var sliderPercentage = 1; // [percentage/100]
+var sliderPercentage = 1; // [factor = percentage/100]
+var sliderPoints = 10;
 let debug = false;
 
 var MMU; // Minimum Maximum Unit
@@ -79,7 +112,7 @@ let min = 0,
             s = 0
         }
         if(e==undefined){
-            e = -1
+            e = dataX.length||0;
         }
         if(zoomStatus == undefined){
             zoomStatus = false
@@ -103,18 +136,52 @@ function Init(){
 
 
 var slider = document.getElementById("myRange");
+var sliderP = document.getElementById("myPoints");
 // var output = document.getElementById("demo");
 // output.innerHTML = slider.value; // Display the default slider value
+
+document.getElementById("pointsValue").innerHTML = sliderPoints;
 
 // Update the current slider value (each time you drag the slider handle)
 slider.oninput = function() {
 //   output.innerHTML = this.value;
 //  tabIndeX_dataT
      sliderPercentage =  Number( this.value / 100 );
-    _e = Math.floor(sliderPercentage * dataX.length);
+    _e = Math.floor(sliderPercentage * dataX.length  - zoomPoints/2 );
+    if(_e < zoomPoints){ _e = zoomPoints; _s = 0};
+    if (_e > dataX.length){_e = dataX.length};
     if(_e < 10){ _e = 10};
     document.getElementById("rangeValue").innerHTML = _e;
     gVar.zoom = {_s, _e, zoomStatus}
+    if(_s<0 || _s==undefined){_s = 0};
+
+    if(button_stop){
+    Ctx.clearRect(0, 0, w, h);
+    CtxG.clearRect(0,0,wg,hg);
+    drawLine()
+    };
+}
+
+sliderP.oninput = function() {
+
+    // if (dataX.length > 30){
+    //  this.max = dataX.length;
+    // }
+    sliderPoints = Number( this.value  );
+    // if (zoomPoints > sliderPoints){ 
+    //     this.value = zoomPoints;     
+    //     console.log(this);
+    // }
+
+    // zoomPoints = sliderPoints
+    // }else{
+    // zoomPoints = dataX.length;   
+    // };
+    document.getElementById("pointsValue").innerHTML = sliderPoints;
+    if(button_stop){
+        Ctx.clearRect(0, 0, w, h);
+        CtxG.clearRect(0,0,wg,hg);
+        drawLine()};
 }
 
 
@@ -178,7 +245,9 @@ window.onload = function() {
         hg   = cg.height;
         wg   = cg.width ;
 
-        zoomPoints = Math.floor( ( c.width / 30 ) ) - 2;
+      //  zoomPoints = Math.floor( ( c.width / 30 ) ) - 2;
+          zoomPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
+          sliderPoints = zoomPoints;
 
         // Canvas Context
         Ctx  = c.getContext('2d');
@@ -311,15 +380,24 @@ window.onload = function() {
 }
 
     Init();
-    document.getElementById('IP').value = '192.168.2.*';
+    document.getElementById('IP_P1').value = '192.168.2.*';
 };
 
 async function wrapper(){
     console.log('start');
     await waitInterval( meter, 999);
+    // await waitInterval( meterW, 999);
     console.log(iteration);
     button_stop = true;
     console.log('finish');
+};
+async function wrapperW(){
+    console.log('start W');
+    // await waitInterval( meter, 999);
+    await waitInterval( meterW, 999);
+    console.log(iteration);
+    button_stop = true;
+    console.log('finish W');
 };
 
 function toggleZoom(){
@@ -338,11 +416,14 @@ function toggleZoom(){
     if(gVar.zoom.zoomStatus){
         _e =  Math.floor( dataX.length * sliderPercentage );
         if(_e < 10){ _e = 10};
+        if(_e > dataX.length){_e = data.length};
         document.getElementById("rangeValue").innerHTML = _e;
         _s = _e - zoomPoints; //- 10;
         if (_s< 0){
             _s = 0;
         }
+        sliderPoints = _e - _s;
+        zoomPoints = sliderPoints;
         // Set to global scope
         // gVar.zoom.e = _s;
         // gVar.zoom.s = _e;
@@ -358,6 +439,12 @@ function toggleZoom(){
             document.getElementById("rangeValue").innerHTML = gVar.zoom.e;
         }
     }
+
+    if(button_stop){
+        Ctx.clearRect(0, 0, w, h);
+        CtxG.clearRect(0,0,wg,hg);
+        drawLine()};
+
 }
 
 function getMinMaxUn(AA){
@@ -441,22 +528,31 @@ if(min == max){
         un = (max - min) / 10;
 
     // Units of 100,150, 200 and such
+    if ( un >= 1000){
+        max = Math.ceil(max / 10000) * 10000;
+        min = Math.floor(min / 10000) * 10000;
+        un = Math.ceil(un / 1000 ) * 1000;          
+    // Units of 10, 15, 20 etc
+    }else
     if ( un >= 100){
         max = Math.ceil(max / 1000) * 1000;
         min = Math.floor(min / 1000) * 1000;
         un = Math.ceil(un / 100 ) * 100;
     // Units of 10, 15, 20 etc
-    }else if ( un >= 10){
+    }else 
+    if ( un >= 10){
         max = Math.ceil(max / 100) * 100;
         min = Math.floor(min / 100) * 100;
         un = Math.ceil(un / 10) * 10;
     // Units of 1 2 5    
-    }else if ( un >= 1){     
+    }else 
+    if ( un >= 1){     
       max = Math.ceil( max / 10) * 10;
       min = Math.floor( min / 10) * 10;
       un = (Math.ceil( un / 1) ) * 1;
     // Units of 0.1 0.2 0.5
-    }else if ( un >= 0){      
+    }else 
+    if ( un >= 0){      
         max = Math.ceil( max * 1) / 1;
         min = Math.floor( min * 1) / 1;
         un = (Math.ceil( un * 10) ) / 10;
@@ -524,24 +620,43 @@ function drawLine(){
 }
 
 async function tryIP(_ip){
-    let url = 'http://' + _ip + '/api/v1/data';
+    let url = 'http://' + _ip + '/api'; // '/api/v1/data';
+    // http://192.168.2.4/api   {"product_type":"HWE-P1","product_name":"P1 meter",
 
     const promise1 = new Promise( (resolve,reject) =>{
         if(debug){ console.log(url) };
 
             fetch(url)
-                 .then(function(response){
+                 .then( async function(response){
                      if (response.ok){
-                        ip = _ip;
-                            console.log(ip);
-                            if(debug){console.log('Found, url, ip')};
-                            document.getElementById('IP').value = ip;
+                        
+                        let _json = await response.json();
+                        // _json.then
+                        if (_json.product_type == "HWE-P1"){
+                            ip.P1 = _ip;
+                            console.log(ip.P1);
+                            if(debug){console.log('Found HWE-P1', url, ip.P1)};
+                            document.getElementById('IP_P1').value = ip.P1;
                             resolve
+                        }
+                        if (_json.product_type == "HWE-WTR"){
+                            ip.WTR = _ip;
+                            console.log(ip.WTR);
+                            if(debug){console.log('Found HWE-WTR', url, ip.WTR)};
+                            document.getElementById('IP_WTR').value = ip.WTR;
+                            resolve
+                        }
+
+                            reject
                         }else{
                                 // alert("HTTP-Error: " + response.status);
                              reject
                         }
                 //     console.log(response);
+                return response.json()
+                })
+                .catch((err) => {
+                    // console.log(err);
                 })
     })
     const promise2 = new Promise((resolve, reject) => setTimeout(reject, 100));
@@ -557,11 +672,12 @@ async function tryIP(_ip){
 function scanIP(){
 
     // Currently only a scan on last .* part of ip4
-    ip = document.getElementById('IP').value; 
-    if (ip != '' && ip.split('.')[3].includes('*')){
+    ip.P1  = document.getElementById('IP_P1').value; 
+    ip.WTR = document.getElementById('IP_WTR').value; 
+    if (ip.P1 != '' && ip.P1.split('.')[3].includes('*')){
         // Scan network on last
         // console.log(ip)
-        let _ip = ip;
+        let _ip = ip.P1;
        // .1 up to .255 scan the ip range
             for (var ii = 1; ii < 256; ii++)  {  
                 let _ipArray = _ip.split('.')
@@ -578,9 +694,14 @@ function run(){
 
     button_stop = false;
   
-    ip = document.getElementById('IP').value; 
+    ip.P1    = document.getElementById('IP_P1').value; 
+    ip.WTR = document.getElementById('IP_WTR').value; 
 
-        if (ip != '' && !ip.includes('*')){
+    if (ip.WTR != '' && !ip.WTR.includes('*')){
+        wrapperW() ;
+    }
+
+        if (ip.P1 != '' && !ip.P1.includes('*')){
         Init(); 
 
         if(e_start){
@@ -670,7 +791,7 @@ function stop(){
 
 async function meter(i){
     iteration = i;
-    let url = 'http://' + ip + '/api/v1/data';
+    let url = 'http://' + ip.P1 + '/api/v1/data';
     let response = await fetch(url);
 
     if (response.ok) { // if HTTP-status is 200-299
@@ -686,6 +807,8 @@ async function meter(i){
 // Write to Screen
 
     // Details
+    // IP_P1
+    document.getElementById('IP_P1').innerHTML          = ip.P1;                   // wifi_ssid :  WifiSSID
     document.getElementById('WifiSSID').innerHTML       = json.wifi_ssid;       // wifi_ssid :  WifiSSID
     document.getElementById('WifiStrength').innerHTML   = json.wifi_strength;   // wifi_strength : 
     document.getElementById('MM').innerHTML             = json.meter_model;     //meter_model
@@ -811,12 +934,13 @@ async function meter(i){
     }
 
     // Water details
-    if(json.active_liter_lpm){
-        document.getElementById('AL').innerHTML = json.active_liter_lpm;   // active_liter_lpm	            Active water usage in liters per minute
-        document.getElementById('TL').innerHTML = json.total_liter_m3;    // total_liter_m3	            Total water usage in cubic meters since installation
-    }else{
-        document.getElementById('AL').innerHTML =  document.getElementById('TL').innerHTML = '';
-    }
+    // document.getElementById('IP_W1').innerHTML          = ip_W1;                   // wifi_ssid :  WifiSSID
+    // if(json.active_liter_lpm){
+    //     document.getElementById('AL').innerHTML = json.active_liter_lpm;   // active_liter_lpm	            Active water usage in liters per minute
+    //     document.getElementById('TL').innerHTML = json.total_liter_m3;    // total_liter_m3	            Total water usage in cubic meters since installation
+    // }else{
+    //     document.getElementById('AL').innerHTML =  document.getElementById('TL').innerHTML = '';
+    // }
 
     let _return = ( i == max_seconds || button_stop );
     if (_return){
@@ -830,6 +954,42 @@ async function meter(i){
     }
 
 }
+
+async function meterW(iW){
+    iterationW = iW;
+    let url = 'http://' + ip.WTR + '/api/v1/data';
+    let response = await fetch(url);
+
+    if (response.ok) { // if HTTP-status is 200-299
+      // get the response body (the method explained below)
+      let json = await response.json();
+
+      dataL_Total.push(json.active_power_w);
+ 
+
+    // Water details
+    document.getElementById('IP_W1').innerHTML          = ip.WTR;                   // wifi_ssid :  WifiSSID
+    if(json.active_liter_lpm){
+        document.getElementById('AL').innerHTML = json.active_liter_lpm;   // active_liter_lpm	            Active water usage in liters per minute
+        document.getElementById('TL').innerHTML = json.total_liter_m3;    // total_liter_m3	            Total water usage in cubic meters since installation
+    }else{
+        document.getElementById('AL').innerHTML =  document.getElementById('TL').innerHTML = '';
+    }
+
+    let _return = ( iW == max_seconds || button_stop );
+    if (_return){
+        stop()
+    }
+    return _return ;
+
+    }           // response OK 
+    else {      // response ERROR
+      alert("HTTP-Error: " + response.status);
+    }
+
+}
+
+
 
 function writeNumbers_E(json){
       // Always Phase 1    
@@ -1164,42 +1324,70 @@ x += xs ; // Every 5 minutes : should be
     n = max;
 
     // let _length = dataX.length;
-     _length = _e - _s ;
+    //  _length = _e - _s ;
+
+     if(zoomStatus){
+        
+        if (zoomPoints < dataX.length){
+            _length = zoomPoints;
+            _s = _e - _length;
+            if (_s<0){s=0; _e = zoomPoints};
+        }else{
+            _length = dataX.length;
+            _s = 0;
+            _e = _length;
+        }
+
+    }else{
+        if (_s<0){s=0; _e = dataX.length};
+    }
+    _length = _e - _s ;
 
     // for(xdata of dataX){
         for (let ix = _s; ix < _e; ix++) { 
             const xdata = dataX[ix];
 
         ctx.font = "12px Arial";
-        if(zoomStatus){
-            ctx.fillText(xdata, x,h-10);
-            x += xs;
-        }else{
 
-        if (_length > 300){
-            ctx.fillText(xdata*60, x +60*xs -xs ,h-10); 
-            x += xs*60;
-        }else
-        if (_length > 140){
-            ctx.fillText(xdata*20, x +20*xs -xs ,h-10); 
-            x += xs*20;
-        }else
-        if (_length > 50){
-            ctx.fillText(xdata*10, x +10*xs -xs ,h-10); 
-            x += xs*10;
-        }else
-        if (_length > 20){
-            ctx.fillText(xdata*5, x +5*xs - xs ,h-10); 
-            x += xs*5;
-        }else 
-        if (_length > 10){
-            ctx.fillText(xdata*2, x +2*xs - xs ,h-10); 
-            x += xs*2;
+        // if(zoomStatus){
+        //     // ctx.fillText(xdata, x,h-10);
+        //     // x += xs;
+        // }
+        // }else{
+
+                  // c_width = 800
+                  // _length = 10 -> factor = 1
+                  // _length = 100 -> factor = 10 
+             // Show in hours     
+            if (_length > 24000){                             // 1h 2h 3h 4h 5h 6h
+                    let _factor = Math.floor(_length/3600)*10 // hours
+                    ctx.fillText(xdata+'u', x +_factor*xs - xs ,h-10); 
+                    x += xs*_factor;
+              }else 
+             // Show in minutes 
+            if (_length > 420){                           // 1m 2m 3m 4m 5m 6m
+                  let _factor = Math.floor(_length/60)*10 // minutes
+                  ctx.fillText(xdata+'m', x +_factor*xs - xs ,h-10); 
+                  x += xs*_factor;
+            }else 
+            // Show seconds
+            if (_length > 200){
+                    let _factor = Math.floor(_length/100)*10    // 30 60 90
+                    ctx.fillText(xdata*_factor, x +_factor*xs - xs ,h-10); 
+                    x += xs*_factor;
+            }else 
+            if (_length > 10){
+                let _factor = Math.floor(_length/10)
+                ctx.fillText(xdata*_factor, x +_factor*xs - xs ,h-10); 
+                x += xs*_factor;
+
         }else{
         ctx.fillText(xdata, x,h-10);
         x += xs;
         }
-    }
+
+
+    // }
         
     }
     while(y < h-30){
