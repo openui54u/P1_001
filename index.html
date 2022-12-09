@@ -108,6 +108,19 @@ tr:nth-child(even){background-color: #f2f2f2}
   cursor: pointer; /* Cursor on hover */
 }
 
+#test {
+    position: relative;
+    font-size: 3em;
+    color: red;
+}
+.main_container{
+    position: relative;
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    bottom: 10px;
+}
+
 
     </style>
 
@@ -116,15 +129,19 @@ tr:nth-child(even){background-color: #f2f2f2}
 
 <script src="main.js"></script>
 
-<div>
-<label for="IP">IP____P1:</label>
+<div id = main_container class ="main_container">
 
+<div id="test">Homewizard Devices</div>
+
+<div id = 'main'>
+    <form>
+<label for="IP_P1">IP P1:</label><br>
 <input type="text" id="IP_P1" name="IP_P1" required
-       minlength="7" maxlength="15" size="15" >
-       <br>
-       <label for="IP W">IP_Water:</label>
+       minlength="7" maxlength="15" size="15" ><br>
+<label for="IP_WTR">IP Water:</label><br>
 <input type="text" id="IP_WTR" name="IP_WTR" required
        minlength="7" maxlength="15" size="15" >
+    </form>
     <br><br>
         <input id="Start" type="button" value = "Start" onclick="run()">
         <input id="Stop" type="button" value = "Stop"  onclick="stop()">
@@ -135,7 +152,7 @@ tr:nth-child(even){background-color: #f2f2f2}
 
       </div>
 
-<br><h0>IP no.:<span id=IP_P1></span></h0>
+<br><h0>IP no.:<span id=IP_P1_001></span></h0>
 <br><h0>Wifi Ssid:<span id=WifiSSID></span></h0>
 <br><h0>Wifi Strength:<span id=WifiStrength>0</span>%</h0>
 <br><h0>Meter model:<span id=MM></span></h0>
@@ -153,7 +170,7 @@ tr:nth-child(even){background-color: #f2f2f2}
     <span>Timeposition</span><div id="rangeValue">10</div>
     <input type="range" min="1" max="100" value="100" step="0.001" class="slider" id="myRange">
     <span>Points</span><div id="pointsValue"></div>
-    <input type="range" min="10" max="6000" value="30" step="10" class="slider" id="myPoints">
+    <input type="range" min="1" max="10" value="2" step="0.05" class="slider" id="myPoints">
 
 </div>
  
@@ -188,13 +205,13 @@ tr:nth-child(even){background-color: #f2f2f2}
 </div>
 
 
-<br><h0>IP no.:<span id=IP_W1></span></h0><br>
+<br><h0>IP no.:<span id="IP_W1_001"></span></h0><br>
 <h0>Active Water usage ( l/min ) :<span id=AL>0</span></h0>
 <h1>Total liters (m3) :<span id=TL>0</span></h1>
 
 
 
-
+</div>
 
 </body>
 </html>

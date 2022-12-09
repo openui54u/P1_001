@@ -88,7 +88,7 @@ var MMU; // Minimum Maximum Unit
 var tabIndexCanvas = 0; // canvas index
 var tabIndeX_dataT = 0; // tab index of E or G
 
-let zoomPoints = 10;
+// var sliderPoints = 10;
 
 const max_seconds = 60*60*24 //1500;
 let e_start = {};
@@ -140,16 +140,22 @@ var sliderP = document.getElementById("myPoints");
 // var output = document.getElementById("demo");
 // output.innerHTML = slider.value; // Display the default slider value
 
-document.getElementById("pointsValue").innerHTML = sliderPoints;
+    document.getElementById("pointsValue").innerHTML = sliderPoints;
 
-// Update the current slider value (each time you drag the slider handle)
-slider.oninput = function() {
+//  Update the current slider value (each time you drag the slider handle)
+
+    slider.oninput = function() {
 //   output.innerHTML = this.value;
 //  tabIndeX_dataT
-     sliderPercentage =  Number( this.value / 100 );
-    _e = Math.floor(sliderPercentage * dataX.length  - zoomPoints/2 );
-    if(_e < zoomPoints){ _e = zoomPoints; _s = 0};
-    if (_e > dataX.length){_e = dataX.length};
+    sliderPercentage =  Number( this.value / 100 );
+    _e = Math.floor(sliderPercentage * dataX.length);//  - sliderPoints/2 );
+    _s = _e - sliderPoints;
+    if(_s < 0){ _s = 0 };
+//  if(_e < sliderPoints){ _e = sliderPoints; _s = 0};
+    if(sliderPoints > dataX.length){ sliderPoints = dataX.length; _s = 0; 
+        //console.log("sliderPoints correct to dataX length")
+    };
+//  if (_e > dataX.length){_e = dataX.length};
     if(_e < 10){ _e = 10};
     document.getElementById("rangeValue").innerHTML = _e;
     gVar.zoom = {_s, _e, zoomStatus}
@@ -167,15 +173,15 @@ sliderP.oninput = function() {
     // if (dataX.length > 30){
     //  this.max = dataX.length;
     // }
-    sliderPoints = Number( this.value  );
-    // if (zoomPoints > sliderPoints){ 
-    //     this.value = zoomPoints;     
+    sliderPoints = Math.floor( Math.exp( Number( this.value  ) ) );
+    // if (sliderPoints > sliderPoints){ 
+    //     this.value = sliderPoints;     
     //     console.log(this);
     // }
 
-    // zoomPoints = sliderPoints
+    // sliderPoints = sliderPoints
     // }else{
-    // zoomPoints = dataX.length;   
+    // sliderPoints = dataX.length;   
     // };
     document.getElementById("pointsValue").innerHTML = sliderPoints;
     if(button_stop){
@@ -245,9 +251,9 @@ window.onload = function() {
         hg   = cg.height;
         wg   = cg.width ;
 
-      //  zoomPoints = Math.floor( ( c.width / 30 ) ) - 2;
-          zoomPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
-          sliderPoints = zoomPoints;
+      //  sliderPoints = Math.floor( ( c.width / 30 ) ) - 2;
+        //   sliderPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
+          sliderPoints = sliderPoints;
 
         // Canvas Context
         Ctx  = c.getContext('2d');
@@ -418,12 +424,13 @@ function toggleZoom(){
         if(_e < 10){ _e = 10};
         if(_e > dataX.length){_e = data.length};
         document.getElementById("rangeValue").innerHTML = _e;
-        _s = _e - zoomPoints; //- 10;
+        _s = _e - sliderPoints; //- 10;
+        // console.log('_s', _s);
         if (_s< 0){
             _s = 0;
         }
         sliderPoints = _e - _s;
-        zoomPoints = sliderPoints;
+        // sliderPoints = sliderPoints;
         // Set to global scope
         // gVar.zoom.e = _s;
         // gVar.zoom.s = _e;
@@ -475,7 +482,7 @@ function getMinMaxUn(AA){
                 _s = AA[0].length - 10
             }
             // if (_s==0){_e = tabIndeX_dataT + 10}
-            if (_s<0){_s=0 ; _e = _s + zoomPoints}  //+10
+            if (_s<0){_s=0 ; _e = _s + sliderPoints}  //+10
             if (_e > AA[0].length){
                 _e = AA[0].length;
             }
@@ -690,11 +697,28 @@ function scanIP(){
 
     }
 }
+
+function setHoverText(){
+
+        // Turn off hover text
+        let _hover = document.getElementsByClassName('tooltip')[0];
+        if(_hover){
+        if(!button_stop){
+            _hover.style.display = 'none';
+        }else{
+            _hover.style.display = 'inline-block';
+        }
+    }
+
+}
 function run(){
 
     button_stop = false;
-  
-    ip.P1    = document.getElementById('IP_P1').value; 
+
+    setHoverText();
+    
+
+    ip.P1  = document.getElementById('IP_P1').value; 
     ip.WTR = document.getElementById('IP_WTR').value; 
 
     if (ip.WTR != '' && !ip.WTR.includes('*')){
@@ -702,6 +726,7 @@ function run(){
     }
 
         if (ip.P1 != '' && !ip.P1.includes('*')){
+            document.getElementById('test').innerHTML = '';
         Init(); 
 
         if(e_start){
@@ -724,6 +749,8 @@ function run(){
         wrapper() ;
         
     }else{
+
+        document.getElementById('test').innerHTML = 'TESTDATA';
         // fake numbers insert
         dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];  // x-axis :) 
         dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
@@ -778,6 +805,8 @@ function run(){
 function stop(){
     button_stop = true;
 
+    setHoverText();
+
     if(e_start){
         e_start.style.opacity = 1 }; // Show Start
      if(e_stop){
@@ -808,7 +837,7 @@ async function meter(i){
 
     // Details
     // IP_P1
-    document.getElementById('IP_P1').innerHTML          = ip.P1;                   // wifi_ssid :  WifiSSID
+    document.getElementById('IP_P1_001').innerHTML      = ip.P1;                   // wifi_ssid :  WifiSSID
     document.getElementById('WifiSSID').innerHTML       = json.wifi_ssid;       // wifi_ssid :  WifiSSID
     document.getElementById('WifiStrength').innerHTML   = json.wifi_strength;   // wifi_strength : 
     document.getElementById('MM').innerHTML             = json.meter_model;     //meter_model
@@ -829,7 +858,7 @@ async function meter(i){
             _e =  Math.floor( dataX.length * sliderPercentage ) ;
             if(_e < 10){ _e = 10};
             document.getElementById("rangeValue").innerHTML = _e;
-            _s = _e - zoomPoints; //10
+            _s = _e - sliderPoints; //10
             if (_s< 0){
                 _s = 0;
             }
@@ -968,7 +997,7 @@ async function meterW(iW){
  
 
     // Water details
-    document.getElementById('IP_W1').innerHTML          = ip.WTR;                   // wifi_ssid :  WifiSSID
+    document.getElementById('IP_W1_001').innerHTML          = ip.WTR;                   // wifi_ssid :  WifiSSID
     if(json.active_liter_lpm){
         document.getElementById('AL').innerHTML = json.active_liter_lpm;   // active_liter_lpm	            Active water usage in liters per minute
         document.getElementById('TL').innerHTML = json.total_liter_m3;    // total_liter_m3	            Total water usage in cubic meters since installation
@@ -1328,10 +1357,10 @@ x += xs ; // Every 5 minutes : should be
 
      if(zoomStatus){
         
-        if (zoomPoints < dataX.length){
-            _length = zoomPoints;
+        if (sliderPoints < dataX.length){
+            _length = sliderPoints;
             _s = _e - _length;
-            if (_s<0){s=0; _e = zoomPoints};
+            if (_s<0){s=0; _e = sliderPoints};
         }else{
             _length = dataX.length;
             _s = 0;

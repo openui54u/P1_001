@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P1 reader</title><style>#P1{color:#0f0}#P2{color:#d6d610}#P3{color:purple}#PT{color:#0b95d3}#PTd3{font-size:.6em}#PTd2{font-size:.6em}#PTd1{font-size:.6em}#P1d3{font-size:.6em}#P1d2{font-size:.6em}#P1d1{font-size:.6em}#P2d3{font-size:.6em}#P2d2{font-size:.6em}#P2d1{font-size:.6em}#P3d3{font-size:.6em}#P3d2{font-size:.6em}#P3d1{font-size:.6em}table{border-collapse:collapse;border-spacing:0;width:100%;border:1px solid #ddd}td,th{text-align:left;padding:8px}tr:first-child{background-color:#9cd1e9}tr:nth-child(even){background-color:#f2f2f2}.tooltip{position:relative;display:inline-block;border-bottom:1px dotted #000}.tooltip .tooltiptext{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;padding:5px 0;border-radius:6px;position:absolute;z-index:1}.tooltip:hover .tooltiptext{visibility:visible}.slidecontainer{left:60px;position:relative;width:740px}.slider{-webkit-appearance:none;appearance:none;width:100%;height:25px;background:#d3d3d3;outline:0;opacity:.7;-webkit-transition:.2s;transition:opacity .2s}.slider:hover{opacity:1}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;background:#04aa6d;cursor:pointer}.slider::-moz-range-thumb{width:25px;height:25px;background:#04aa6d;cursor:pointer}</style></head><body><script>// Author: Edwin Glaser
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P1 reader</title><style>#P1{color:#0f0}#P2{color:#d6d610}#P3{color:purple}#PT{color:#0b95d3}#PTd3{font-size:.6em}#PTd2{font-size:.6em}#PTd1{font-size:.6em}#P1d3{font-size:.6em}#P1d2{font-size:.6em}#P1d1{font-size:.6em}#P2d3{font-size:.6em}#P2d2{font-size:.6em}#P2d1{font-size:.6em}#P3d3{font-size:.6em}#P3d2{font-size:.6em}#P3d1{font-size:.6em}table{border-collapse:collapse;border-spacing:0;width:100%;border:1px solid #ddd}td,th{text-align:left;padding:8px}tr:first-child{background-color:#9cd1e9}tr:nth-child(even){background-color:#f2f2f2}.tooltip{position:relative;display:inline-block;border-bottom:1px dotted #000}.tooltip .tooltiptext{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;padding:5px 0;border-radius:6px;position:absolute;z-index:1}.tooltip:hover .tooltiptext{visibility:visible}.slidecontainer{left:60px;position:relative;width:740px}.slider{-webkit-appearance:none;appearance:none;width:100%;height:25px;background:#d3d3d3;outline:0;opacity:.7;-webkit-transition:.2s;transition:opacity .2s}.slider:hover{opacity:1}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;background:#04aa6d;cursor:pointer}.slider::-moz-range-thumb{width:25px;height:25px;background:#04aa6d;cursor:pointer}#test{position:relative;font-size:3em;color:red}.main_container{position:relative;left:10px;right:10px;top:10px;bottom:10px}</style></head><body><script>// Author: Edwin Glaser
 // --------  Only for private usage -----------
 // Date Nov. 2022
 // HomeWizard P1 
@@ -88,7 +88,7 @@ var MMU; // Minimum Maximum Unit
 var tabIndexCanvas = 0; // canvas index
 var tabIndeX_dataT = 0; // tab index of E or G
 
-let zoomPoints = 10;
+// var sliderPoints = 10;
 
 const max_seconds = 60*60*24 //1500;
 let e_start = {};
@@ -140,16 +140,22 @@ var sliderP = document.getElementById("myPoints");
 // var output = document.getElementById("demo");
 // output.innerHTML = slider.value; // Display the default slider value
 
-document.getElementById("pointsValue").innerHTML = sliderPoints;
+    document.getElementById("pointsValue").innerHTML = sliderPoints;
 
-// Update the current slider value (each time you drag the slider handle)
-slider.oninput = function() {
+//  Update the current slider value (each time you drag the slider handle)
+
+    slider.oninput = function() {
 //   output.innerHTML = this.value;
 //  tabIndeX_dataT
-     sliderPercentage =  Number( this.value / 100 );
-    _e = Math.floor(sliderPercentage * dataX.length  - zoomPoints/2 );
-    if(_e < zoomPoints){ _e = zoomPoints; _s = 0};
-    if (_e > dataX.length){_e = dataX.length};
+    sliderPercentage =  Number( this.value / 100 );
+    _e = Math.floor(sliderPercentage * dataX.length);//  - sliderPoints/2 );
+    _s = _e - sliderPoints;
+    if(_s < 0){ _s = 0 };
+//  if(_e < sliderPoints){ _e = sliderPoints; _s = 0};
+    if(sliderPoints > dataX.length){ sliderPoints = dataX.length; _s = 0; 
+        //console.log("sliderPoints correct to dataX length")
+    };
+//  if (_e > dataX.length){_e = dataX.length};
     if(_e < 10){ _e = 10};
     document.getElementById("rangeValue").innerHTML = _e;
     gVar.zoom = {_s, _e, zoomStatus}
@@ -167,15 +173,15 @@ sliderP.oninput = function() {
     // if (dataX.length > 30){
     //  this.max = dataX.length;
     // }
-    sliderPoints = Number( this.value  );
-    // if (zoomPoints > sliderPoints){ 
-    //     this.value = zoomPoints;     
+    sliderPoints = Math.floor( Math.exp( Number( this.value  ) ) );
+    // if (sliderPoints > sliderPoints){ 
+    //     this.value = sliderPoints;     
     //     console.log(this);
     // }
 
-    // zoomPoints = sliderPoints
+    // sliderPoints = sliderPoints
     // }else{
-    // zoomPoints = dataX.length;   
+    // sliderPoints = dataX.length;   
     // };
     document.getElementById("pointsValue").innerHTML = sliderPoints;
     if(button_stop){
@@ -245,9 +251,9 @@ window.onload = function() {
         hg   = cg.height;
         wg   = cg.width ;
 
-      //  zoomPoints = Math.floor( ( c.width / 30 ) ) - 2;
-          zoomPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
-          sliderPoints = zoomPoints;
+      //  sliderPoints = Math.floor( ( c.width / 30 ) ) - 2;
+        //   sliderPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
+          sliderPoints = sliderPoints;
 
         // Canvas Context
         Ctx  = c.getContext('2d');
@@ -418,12 +424,13 @@ function toggleZoom(){
         if(_e < 10){ _e = 10};
         if(_e > dataX.length){_e = data.length};
         document.getElementById("rangeValue").innerHTML = _e;
-        _s = _e - zoomPoints; //- 10;
+        _s = _e - sliderPoints; //- 10;
+        // console.log('_s', _s);
         if (_s< 0){
             _s = 0;
         }
         sliderPoints = _e - _s;
-        zoomPoints = sliderPoints;
+        // sliderPoints = sliderPoints;
         // Set to global scope
         // gVar.zoom.e = _s;
         // gVar.zoom.s = _e;
@@ -475,7 +482,7 @@ function getMinMaxUn(AA){
                 _s = AA[0].length - 10
             }
             // if (_s==0){_e = tabIndeX_dataT + 10}
-            if (_s<0){_s=0 ; _e = _s + zoomPoints}  //+10
+            if (_s<0){_s=0 ; _e = _s + sliderPoints}  //+10
             if (_e > AA[0].length){
                 _e = AA[0].length;
             }
@@ -690,11 +697,28 @@ function scanIP(){
 
     }
 }
+
+function setHoverText(){
+
+        // Turn off hover text
+        let _hover = document.getElementsByClassName('tooltip')[0];
+        if(_hover){
+        if(!button_stop){
+            _hover.style.display = 'none';
+        }else{
+            _hover.style.display = 'inline-block';
+        }
+    }
+
+}
 function run(){
 
     button_stop = false;
-  
-    ip.P1    = document.getElementById('IP_P1').value; 
+
+    setHoverText();
+    
+
+    ip.P1  = document.getElementById('IP_P1').value; 
     ip.WTR = document.getElementById('IP_WTR').value; 
 
     if (ip.WTR != '' && !ip.WTR.includes('*')){
@@ -702,6 +726,7 @@ function run(){
     }
 
         if (ip.P1 != '' && !ip.P1.includes('*')){
+            document.getElementById('test').innerHTML = '';
         Init(); 
 
         if(e_start){
@@ -724,6 +749,8 @@ function run(){
         wrapper() ;
         
     }else{
+
+        document.getElementById('test').innerHTML = 'TESTDATA';
         // fake numbers insert
         dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];  // x-axis :) 
         dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
@@ -778,6 +805,8 @@ function run(){
 function stop(){
     button_stop = true;
 
+    setHoverText();
+
     if(e_start){
         e_start.style.opacity = 1 }; // Show Start
      if(e_stop){
@@ -808,7 +837,7 @@ async function meter(i){
 
     // Details
     // IP_P1
-    document.getElementById('IP_P1').innerHTML          = ip.P1;                   // wifi_ssid :  WifiSSID
+    document.getElementById('IP_P1_001').innerHTML      = ip.P1;                   // wifi_ssid :  WifiSSID
     document.getElementById('WifiSSID').innerHTML       = json.wifi_ssid;       // wifi_ssid :  WifiSSID
     document.getElementById('WifiStrength').innerHTML   = json.wifi_strength;   // wifi_strength : 
     document.getElementById('MM').innerHTML             = json.meter_model;     //meter_model
@@ -829,7 +858,7 @@ async function meter(i){
             _e =  Math.floor( dataX.length * sliderPercentage ) ;
             if(_e < 10){ _e = 10};
             document.getElementById("rangeValue").innerHTML = _e;
-            _s = _e - zoomPoints; //10
+            _s = _e - sliderPoints; //10
             if (_s< 0){
                 _s = 0;
             }
@@ -968,7 +997,7 @@ async function meterW(iW){
  
 
     // Water details
-    document.getElementById('IP_W1').innerHTML          = ip.WTR;                   // wifi_ssid :  WifiSSID
+    document.getElementById('IP_W1_001').innerHTML          = ip.WTR;                   // wifi_ssid :  WifiSSID
     if(json.active_liter_lpm){
         document.getElementById('AL').innerHTML = json.active_liter_lpm;   // active_liter_lpm	            Active water usage in liters per minute
         document.getElementById('TL').innerHTML = json.total_liter_m3;    // total_liter_m3	            Total water usage in cubic meters since installation
@@ -1328,10 +1357,10 @@ x += xs ; // Every 5 minutes : should be
 
      if(zoomStatus){
         
-        if (zoomPoints < dataX.length){
-            _length = zoomPoints;
+        if (sliderPoints < dataX.length){
+            _length = sliderPoints;
             _s = _e - _length;
-            if (_s<0){s=0; _e = zoomPoints};
+            if (_s<0){s=0; _e = sliderPoints};
         }else{
             _length = dataX.length;
             _s = 0;
@@ -1459,4 +1488,4 @@ function object(object){
     return document.querySelector(object);
 }
 
-//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div><label for="IP">IP____P1:</label> <input type="text" id="IP_P1" name="IP_P1" required minlength="7" maxlength="15" size="15"><br><label for="IP W">IP_Water:</label> <input type="text" id="IP_WTR" name="IP_WTR" required minlength="7" maxlength="15" size="15"><br><br><input id="Start" type="button" value="Start" onclick="run()"> <input id="Stop" type="button" value="Stop" onclick="stop()"><div class="tooltip"><input id="Scan" type="button" value="Scan" onclick="scanIP()"> <span class="tooltiptext">Use IP syntax with 1 wildcard: ###.###.###.*</span></div></div><br><h0>IP no.:<span id="IP_P1"></span></h0><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span> <span id="P1d3">0</span> <span id="P1d2">0</span> <span id="P1d1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span> <span id="P2d3">0</span> <span id="P2d2">0</span> <span id="P2d1">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span> <span id="P3d3">0</span> <span id="P3d2">0</span> <span id="P3d1">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><input id="Zoom" type="button" value="Zoom" onclick="toggleZoom()"><div class="slidecontainer"><span>Timeposition</span><div id="rangeValue">10</div><input type="range" min="1" max="100" value="100" step="0.001" class="slider" id="myRange"> <span>Points</span><div id="pointsValue"></div><input type="range" min="10" max="6000" value="30" step="10" class="slider" id="myPoints"></div><chart><canvas le id="E" width="800px" height="420px" tabindex="1"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#8d8e8f"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><div style="overflow-x:auto"><table><tbody id="TimeGasM3"></tbody></table></div><chartg><canvas lg id="G" width="800px" height="420px" tabindex="2"></canvas><draw-canvas-data-setg style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#81aad2"></draw-canvas-data-setg></chartg><br><h0>IP no.:<span id="IP_W1"></span></h0><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>
+//  -- - - - - - - - - - - - - - - - - - - - - - - - - - -</script><div id="main_container" class="main_container"><div id="test">Homewizard Devices</div><div id="main"><form><label for="IP_P1">IP P1:</label><br><input type="text" id="IP_P1" name="IP_P1" required minlength="7" maxlength="15" size="15"><br><label for="IP_WTR">IP Water:</label><br><input type="text" id="IP_WTR" name="IP_WTR" required minlength="7" maxlength="15" size="15"></form><br><br><input id="Start" type="button" value="Start" onclick="run()"> <input id="Stop" type="button" value="Stop" onclick="stop()"><div class="tooltip"><input id="Scan" type="button" value="Scan" onclick="scanIP()"> <span class="tooltiptext">Use IP syntax with 1 wildcard: ###.###.###.*</span></div></div><br><h0>IP no.:<span id="IP_P1_001"></span></h0><br><h0>Wifi Ssid:<span id="WifiSSID"></span></h0><br><h0>Wifi Strength:<span id="WifiStrength">0</span>%</h0><br><h0>Meter model:<span id="MM"></span></h0><br><h0>SMR version:<span id="SV"></span></h0><br><h1>Fase 1 (W):<span id="P1">0</span> <span id="P1d3">0</span> <span id="P1d2">0</span> <span id="P1d1">0</span></h1><h1>Fase 2 (W):<span id="P2">0</span> <span id="P2d3">0</span> <span id="P2d2">0</span> <span id="P2d1">0</span></h1><h1>Fase 3 (W):<span id="P3">0</span> <span id="P3d3">0</span> <span id="P3d2">0</span> <span id="P3d1">0</span></h1><h1>Totaal (W):<span id="PT">0</span> <span id="PTd3">0</span> <span id="PTd2">0</span> <span id="PTd1">0</span></h1><input id="Zoom" type="button" value="Zoom" onclick="toggleZoom()"><div class="slidecontainer"><span>Timeposition</span><div id="rangeValue">10</div><input type="range" min="1" max="100" value="100" step="0.001" class="slider" id="myRange"> <span>Points</span><div id="pointsValue"></div><input type="range" min="1" max="10" value="2" step="0.05" class="slider" id="myPoints"></div><chart><canvas le id="E" width="800px" height="420px" tabindex="1"></canvas><draw-canvas-data-set style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#8d8e8f"></draw-canvas-data-set></chart><br><h1>Export T1 (kWh) :<span id="ET1">0</span></h1><h1>Export T2 (kWh) :<span id="ET2">0</span></h1><h1>Import T1 (kWh) :<span id="IT1">0</span></h1><h1>Import T2 (kWh) :<span id="IT2">0</span></h1><br><div style="overflow-x:auto"><table><tbody id="TimeGasM3"></tbody></table></div><chartg><canvas lg id="G" width="800px" height="420px" tabindex="2"></canvas><draw-canvas-data-setg style="width:fit-content;height:fit-content;padding:5px 15px;margin:5px;position:absolute;left:618px;top:160px;opacity:0;transition:all .5s ease 0s;color:#fff;background:#81aad2"></draw-canvas-data-setg></chartg></div><br><h0>IP no.:<span id="IP_W1_001"></span></h0><br><h0>Active Water usage ( l/min ) :<span id="AL">0</span></h0><h1>Total liters (m3) :<span id="TL">0</span></h1></body></html>
