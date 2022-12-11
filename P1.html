@@ -121,6 +121,74 @@ tr:nth-child(even){background-color: #f2f2f2}
     bottom: 10px;
 }
 
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider Button */
+.sliderB {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.sliderB:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .sliderB {
+  background-color: #2196F3;
+}
+
+input:focus + .sliderB {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .sliderB:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.sliderB.round {
+  border-radius: 34px;
+}
+
+.sliderB.round:before {
+  border-radius: 50%;
+}
+#table_GAS{
+    left : 2vw;
+    width: 90vw;
+    max-width: 800px;
+}
+
 
     </style>
 
@@ -269,6 +337,10 @@ function Init(){
 
 var slider = document.getElementById("myRange");
 var sliderP = document.getElementById("myPoints");
+
+var sliderTableSwitch = document.getElementById("tableSwitch_GAS");
+
+
 // var output = document.getElementById("demo");
 // output.innerHTML = slider.value; // Display the default slider value
 
@@ -276,22 +348,17 @@ var sliderP = document.getElementById("myPoints");
 
 //  Update the current slider value (each time you drag the slider handle)
 
+// sliderTableSwitch.oninput = function(){
+//     console.log(this);
+// }
+
     slider.oninput = function() {
-//   output.innerHTML = this.value;
-//  tabIndeX_dataT
+
     sliderPercentage =  Number( this.value / 100 );
-    _e = Math.floor(sliderPercentage * dataX.length);//  - sliderPoints/2 );
-    _s = _e - sliderPoints;
-    if(_s < 0){ _s = 0 };
-//  if(_e < sliderPoints){ _e = sliderPoints; _s = 0};
-    if(sliderPoints > dataX.length){ sliderPoints = dataX.length; _s = 0; 
-        //console.log("sliderPoints correct to dataX length")
-    };
-//  if (_e > dataX.length){_e = dataX.length};
-    if(_e < 10){ _e = 10};
-    document.getElementById("rangeValue").innerHTML = _e;
-    gVar.zoom = {_s, _e, zoomStatus}
-    if(_s<0 || _s==undefined){_s = 0};
+
+    let _se = set_s_e(sliderPoints, sliderPercentage);
+    _s = _se.s; 
+    _e = _se.e;
 
     if(button_stop){
     Ctx.clearRect(0, 0, w, h);
@@ -302,24 +369,19 @@ var sliderP = document.getElementById("myPoints");
 
 sliderP.oninput = function() {
 
-    // if (dataX.length > 30){
-    //  this.max = dataX.length;
-    // }
     sliderPoints = Math.floor( Math.exp( Number( this.value  ) ) );
-    // if (sliderPoints > sliderPoints){ 
-    //     this.value = sliderPoints;     
-    //     console.log(this);
-    // }
 
-    // sliderPoints = sliderPoints
-    // }else{
-    // sliderPoints = dataX.length;   
-    // };
+    let _se = set_s_e(sliderPoints, sliderPercentage);
+    _s = _se.s; 
+    _e = _se.e;
+
     document.getElementById("pointsValue").innerHTML = sliderPoints;
+   
     if(button_stop){
         Ctx.clearRect(0, 0, w, h);
         CtxG.clearRect(0,0,wg,hg);
         drawLine()};
+
 }
 
 
@@ -354,6 +416,63 @@ sliderP.oninput = function() {
 
 }
 
+
+function set_s_e(sliderPoints, sliderPercentage){
+
+    // Set end point
+    _e = Math.floor(sliderPercentage * dataX.length);
+    if(_e < 10){ _e = 10};
+
+    // Set Start
+    _s = _e - sliderPoints;
+    // if(_s < 0){ _s = 0 };
+    if(_s< 0 || _s==undefined){_s = 0};
+
+//  if(_e < sliderPoints){ _e = sliderPoints; _s = 0};
+    if(sliderPoints > dataX.length){ sliderPoints = dataX.length; _s = 0; 
+        //console.log("sliderPoints correct to dataX length")
+    };
+//  if (_e > dataX.length){_e = dataX.length};
+
+
+    // if(zoomStatus){
+        
+        // if (sliderPoints <= dataX.length){
+        //     _length = sliderPoints;
+        //     // _e = dataX.length;
+        //     _s = _e - _length;
+        //     if (_s<0){s=0; _e = sliderPoints};
+        // }else{
+        //     _length = dataX.length;
+        //     _s = 0;
+        //     _e = _length;
+        // }
+
+    // }else{
+    //     if (_s<0){s=0; _e = dataX.length};
+    // }
+
+    document.getElementById("rangeValue").innerHTML = _e;
+    // gVar.zoom = {_s, _e, zoomStatus}
+    gVar.zoom = {s:_s, e:_e, zoomStatus:zoomStatus}
+
+    return {_s,_e}
+}
+
+
+function tableSwitch_GAS(){
+    let _checkBox = document.getElementById("tableSwitch_GAS").checked;
+    if(debug){console.log( _checkBox )};
+    let _container_GAS = document.getElementById("table_GAS");
+    if(_checkBox && _container_GAS){
+// Show table GAS
+_container_GAS.style.display = "block";
+    }else{
+// Hide table GAS
+_container_GAS.style.display = "none";
+    }
+
+}
 window.onload = function() {
 
 
@@ -385,7 +504,7 @@ window.onload = function() {
 
       //  sliderPoints = Math.floor( ( c.width / 30 ) ) - 2;
         //   sliderPoints = sliderPoints || Math.floor( ( c.width / 30 ) ) - 2;
-          sliderPoints = sliderPoints;
+        //   sliderPoints = sliderPoints;
 
         // Canvas Context
         Ctx  = c.getContext('2d');
@@ -411,27 +530,6 @@ window.onload = function() {
 
         let _ID       = e.currentTarget.attributes[1].nodeValue; // E  G
             tabIndexCanvas = e.currentTarget.attributes[4].nodeValue; // 1  2
-            //console.log(tabIndexCanvas);
-
-            // if(button_stop && Number(e.offsetY)< 10) {
-            // First time zooming:
-            // if ( zoomStatus && Number(e.offsetY)< 10) {
-            //     zoomStatus = false;
-            //     Ctx.clearRect(0, 0, w, h);
-            //     CtxG.clearRect(0,0,wg,hg);
-            //     // drawLine();
-            // }else 
-            // if ( !zoomStatus && Number(e.offsetY)< 10) {
-            //     Ctx.clearRect(0, 0, w, h);
-            //     CtxG.clearRect(0,0,wg,hg);
-                // zoomStatus = true;
-            //     drawLine();
-            // }
-  
-    
-        // zoomStatus = false;
-        //  console.log(_ID, _tabIndex, 'Client:', e.clientX, e.clientY, 'Layer:' , e.layerX, e.layerY, 'Offset:' , e.offsetX , e.offsetY);
-
          _index = 0;
   
         _s = gVar.zoom.s 
@@ -468,12 +566,6 @@ window.onload = function() {
                         tabE.style.opacity = "1"                      // $('draw-canvas-data-set') 
                         tabE.style.left    = e.layerX + "px"            // $('draw-canvas-data-set') 
                         tabE.style.top     = e.layerY + "px"             // $('draw-canvas-data-set') 
-                    //    if(button_stop){
-                        // zoomStatus = true;
-                        // Ctx.clearRect(0, 0, w, h);
-                        // CtxG.clearRect(0,0,wg,hg);
-                        // drawLine();
-                    // };
                        if(debug){ console.log(_index, Number(dataG[7])) };
                        tabIndeX_dataT = Number(dataG[7]);
 
@@ -485,9 +577,7 @@ window.onload = function() {
                         tabG.style.opacity = "1"                     //$('draw-canvas-data-setG')
                         tabG.style.left    = e.layerX + "px"           //$('draw-canvas-data-setG')
                         tabG.style.top     = e.layerY + "px"            //$('draw-canvas-data-setG')
-                        // if(button_stop){
-                        //   zoomStatus = true
-                        // };
+      
                     }
 
                 }
@@ -497,17 +587,6 @@ window.onload = function() {
                  }
                 lx = lx -1
                 dx = dx -1
-
-                // if(button_stop && zoomStatus){
-                // if (zoomStatus){
-                //     Ctx.clearRect(0, 0, w, h);
-                //     CtxG.clearRect(0,0,wg,hg);
-                //     drawLine();
-                //     console.log('refresh');
-                //     // zoomStatus = false;
-                //     // drawLine();
-                // };
-                // zoomStatus = false;
 
         }
         _index++;
@@ -572,6 +651,8 @@ function toggleZoom(){
     //     CtxG.clearRect(0,0,wg,hg);
     // drawLine();
     }else{
+        _e = dataX.length;
+        _s = 0;
         let _r = {s:0, e:dataX.length, zoomStatus:zoomStatus};
         gVar.zoom = _r;
         if(sliderPercentage == 1){
@@ -843,6 +924,59 @@ function setHoverText(){
     }
 
 }
+function fill_data_random(){
+
+let _i        = 600 ; // amount of data points to make
+let _interval = 1   ; // Every int seconds timemark
+
+for ( let i= 0; i < _i ; i++ ){
+    dataX.push( Math.floor(i/_interval));
+    // dataXG.push(Math.floor(i/(_interval*5)));
+    let ran1 = Math.random();
+    let ran2 = Math.random();
+    let ran3 = Math.random();
+    let _l1 = Math.floor(ran1 * 400);
+    let _l2 = Math.floor(ran2 * 400);
+    let _l3 = Math.floor(ran3 * 400);
+    let _tot = _l1 + _l2 + _l3;
+    datal1.push(_l1);
+    datal2.push(_l2);
+    datal3.push(_l3);
+    dataL_Total.push(_tot);
+}
+    // dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];  // x-axis :) 
+    dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
+
+    // dataL_Total = [1000,10010,1001,980,1023,899,455,1200,300,10,232,432,244,666]; // y-axis values Totals
+    // datal1 = [151,242,353,264,115,36,645,374,493,2,55,3,77,55];
+    // datal2 = [12,14,15,33,22,44,77,22,33,34,33,55,22,33,44];
+    // datal3 = [34,866,333,700,600,345,333,1111,233,1,2,3,4,5];
+
+    dataGas = [ 
+    ['21:10:06/22-11-22', 3037.961, 76206],
+    ['21:10:06/22-11-22', 3037.961, 76206],
+    ['21:10:06/22-11-22', 3037.961, 76206],
+    ['21:15:05/22-11-22', 3038.991, 76505],
+    ['21:15:05/22-11-22', 3038.991, 76505],
+    ['21:15:05/22-11-22', 3038.991, 76505],
+    ['21:20:05/22-11-22', 3039.991, 76505],
+    ['21:20:05/22-11-22', 3039.991, 76505]
+    ];
+   
+    dataGasPoint = [ 
+        ["18:10:00/22-11-22",2000.101, 75005, 2, 5, 0.4], 
+        ["18:10:00/22-11-22",2000.108, 75305, 125, 5, 25], 
+        ["18:10:00/22-11-22",2000.150, 75605, 100, 5, 20], 
+        ["18:10:00/22-11-22",2000.200, 75905, 0.0, 5, 0], 
+        ["18:10:00/22-11-22",2000.202, 76205, 28, 5, 15], 
+        ["18:10:00/22-11-22",2000.205, 76505, 255, 5, 50],
+        ["18:10:00/22-11-22",2001.206, 76805, 25, 5, 5], 
+        ["18:10:00/22-11-22",2001.209, 77105, 133, 5, 25]  
+        ];
+
+
+}
+
 function run(){
 
     button_stop = false;
@@ -884,35 +1018,8 @@ function run(){
 
         document.getElementById('test').innerHTML = 'TESTDATA';
         // fake numbers insert
-        dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];  // x-axis :) 
-        dataXG = [1,2,3,4,5,6,7,8,9,10]; // x-axis :) 
-
-        dataL_Total = [1000,10010,1001,980,1023,899,455,1200,300,10,232,432,244,666]; // y-axis values Totals
-        datal1 = [151,242,353,264,115,36,645,374,493,2,55,3,77,55];
-        datal2 = [12,14,15,33,22,44,77,22,33,34,33,55,22,33,44];
-        datal3 = [34,866,333,700,600,345,333,1111,233,1,2,3,4,5];
-
-        dataGas = [ 
-        ['21:10:06/22-11-22', 3037.961, 76206],
-        ['21:10:06/22-11-22', 3037.961, 76206],
-        ['21:10:06/22-11-22', 3037.961, 76206],
-        ['21:15:05/22-11-22', 3038.991, 76505],
-        ['21:15:05/22-11-22', 3038.991, 76505],
-        ['21:15:05/22-11-22', 3038.991, 76505],
-        ['21:20:05/22-11-22', 3039.991, 76505],
-        ['21:20:05/22-11-22', 3039.991, 76505]
-        ];
+        fill_data_random();
        
-        dataGasPoint = [ 
-            ["18:10:00/22-11-22",2000.101, 75005, 2, 5, 0.4], 
-            ["18:10:00/22-11-22",2000.108, 75305, 125, 5, 25], 
-            ["18:10:00/22-11-22",2000.150, 75605, 100, 5, 20], 
-            ["18:10:00/22-11-22",2000.200, 75905, 0.0, 5, 0], 
-            ["18:10:00/22-11-22",2000.202, 76205, 28, 5, 15], 
-            ["18:10:00/22-11-22",2000.205, 76505, 255, 5, 50],
-            ["18:10:00/22-11-22",2001.206, 76805, 25, 5, 5], 
-            ["18:10:00/22-11-22",2001.209, 77105, 133, 5, 25]  
-            ];
         iteration = 1;       
         Ctx.clearRect(0, 0, w, h);
         CtxG.clearRect(0,0,wg,hg);
@@ -921,8 +1028,8 @@ function run(){
         writeNumbers_E( {
             'active_power_w': dataL_Total[dataL_Total.length-1],
             'active_power_l1_w': datal1[dataL_Total.length-1],
-            'active_power_l2_w': datal1[dataL_Total.length-1],
-            'active_power_l3_w': datal1[dataL_Total.length-1],
+            'active_power_l2_w': datal2[dataL_Total.length-1],
+            'active_power_l3_w': datal3[dataL_Total.length-1],
             'total_gas_m3': dataGasPoint[dataGasPoint.length-1],
             'total_power_export_t1_kwh' : 1234,
             'total_power_export_t2_kwh' : 0123,
@@ -959,6 +1066,10 @@ async function meter(i){
       // get the response body (the method explained below)
       let json = await response.json();
 
+      if (isNaN(json.active_power_w))   { json.active_power_w    = 0};
+      if (isNaN(json.active_power_l1_w)){ json.active_power_l1_w = 0};
+      if (isNaN(json.active_power_l2_w)){ json.active_power_l2_w = 0};
+      if (isNaN(json.active_power_l3_w)){ json.active_power_l3_w = 0};
       dataL_Total.push(json.active_power_w);
       datal1.push(json.active_power_l1_w);
       datal2.push(json.active_power_l2_w);
@@ -1484,27 +1595,14 @@ x += xs ; // Every 5 minutes : should be
     // let maxArray = A.map(a => Math.max.apply(null, a));
     n = max;
 
+    let _factor = 1;
     // let _length = dataX.length;
     //  _length = _e - _s ;
-
-     if(zoomStatus){
-        
-        if (sliderPoints < dataX.length){
-            _length = sliderPoints;
-            _s = _e - _length;
-            if (_s<0){s=0; _e = sliderPoints};
-        }else{
-            _length = dataX.length;
-            _s = 0;
-            _e = _length;
-        }
-
-    }else{
-        if (_s<0){s=0; _e = dataX.length};
-    }
+    if(!zoomStatus){_s = 0 };
     _length = _e - _s ;
 
     // for(xdata of dataX){
+        let xi = 0;
         for (let ix = _s; ix < _e; ix++) { 
             const xdata = dataX[ix];
 
@@ -1521,25 +1619,29 @@ x += xs ; // Every 5 minutes : should be
                   // _length = 100 -> factor = 10 
              // Show in hours     
             if (_length > 24000){                             // 1h 2h 3h 4h 5h 6h
-                    let _factor = Math.floor(_length/3600)*10 // hours
-                    ctx.fillText(xdata+'u', x +_factor*xs - xs ,h-10); 
+                   _factor = Math.floor(_length/3600)*10 // hours
+                //    if(!zoomStatus){_factor = 1}
+                    ctx.fillText(xdata + (xi)*_factor+'u', x +_factor*xs - xs ,h-10); 
                     x += xs*_factor;
               }else 
              // Show in minutes 
             if (_length > 420){                           // 1m 2m 3m 4m 5m 6m
-                  let _factor = Math.floor(_length/60)*10 // minutes
-                  ctx.fillText(xdata+'m', x +_factor*xs - xs ,h-10); 
+                  _factor = Math.floor(_length/60)*10 // minutes
+                //   if(!zoomStatus){_factor = 1}
+                  ctx.fillText(xdata + (xi)*_factor+'m', x +_factor*xs - xs ,h-10); 
                   x += xs*_factor;
             }else 
             // Show seconds
             if (_length > 200){
-                    let _factor = Math.floor(_length/100)*10    // 30 60 90
-                    ctx.fillText(xdata*_factor, x +_factor*xs - xs ,h-10); 
+                    _factor = Math.floor(_length/100)*10    // 30 60 90
+                    // if(!zoomStatus){_factor = 1}
+                    ctx.fillText(xdata + (xi)*_factor, x +_factor*xs - xs ,h-10); 
                     x += xs*_factor;
             }else 
             if (_length > 10){
-                let _factor = Math.floor(_length/10)
-                ctx.fillText(xdata*_factor, x +_factor*xs - xs ,h-10); 
+                _factor = Math.floor(_length/10)
+                // if(!zoomStatus){_factor = 1}
+                ctx.fillText(xdata + (xi)*_factor, x +_factor*xs - xs ,h-10); 
                 x += xs*_factor;
 
         }else{
@@ -1549,6 +1651,7 @@ x += xs ; // Every 5 minutes : should be
 
 
     // }
+    // xi++
         
     }
     while(y < h-30){
@@ -1625,8 +1728,6 @@ function object(object){
 
 
 
-
-
 </script>
 
 <div id = main_container class ="main_container">
@@ -1686,8 +1787,14 @@ function object(object){
 <h1>Import T2 (kWh) :<span id=IT2>0</span></h1>
 
 <br>
+<!-- Rounded switch -->
+<span>Show GAS table</span><br>
+<label id="table_switch" class="switch">
+    <input id ="tableSwitch_GAS" type="checkbox" checked onclick="tableSwitch_GAS()">
+    <span class="sliderB round"></span>
+</label><br>
 
-<div style="overflow-x:auto;">
+<div id = "table_GAS" style="overflow-x:auto;">
 <table>
     <tbody id='TimeGasM3'>
 </tbody>
