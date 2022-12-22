@@ -569,30 +569,35 @@ if(min == max){
     if ( un >= 1000){
         max = Math.ceil(max / 5000) * 5000;
         min = Math.floor(min / 5000) * 5000;
+        un = (max - min) / 10;
         un = Math.round(un / 500 ) * 500;          
     // Units of 10, 15, 20 etc
     }else
     if ( un >= 100){
         max = Math.ceil(max / 500) * 500;
         min = Math.floor(min / 500) * 500;
+        un = (max - min) / 10;
         un = Math.round(un / 50 ) * 50;
     // Units of 10, 15, 20 etc
     }else 
     if ( un >= 10){
         max = Math.ceil(max / 50) * 50;
         min = Math.floor(min / 50) * 50;
+        un = (max - min) / 10;
         un = Math.round(un / 10) * 10;
     // Units of 1 2 5    
     }else 
     if ( un >= 1){     
       max = Math.ceil( max / 10) * 10;
       min = Math.floor( min / 10) * 10;
+      un = (max - min) / 10;
       un = (Math.round( un / 1) ) * 1;
     // Units of 0.1 0.2 0.5
     }else 
     if ( un >= 0){      
         max = Math.ceil( max * 1) / 1;
         min = Math.floor( min * 1) / 1;
+        un = (max - min) / 10;
         un = (Math.round( un * 10) ) / 10;
     }
     

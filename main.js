@@ -235,51 +235,12 @@ sliderP.oninput = function() {
 function set_s_e(sliderPoints, sliderPercentage){
 
     // Set end point
-    // if(zoomStatus){
     let _e = Math.floor(sliderPercentage * dataX.length);
     if(_e < 10){ _e = 10};
-    // if(_e >= sliderPoints){ _e = dataX.length};
-    // }else{
-    // _e = dataX.length;
-    // }
 
-    // Set Start
-    // if(zoomStatus){
     let _s = _e - sliderPoints;
     if(_s < 0 || _s==undefined){_s = 0}
-    // }else{
-    // _s = 0;
-    // }
 
-    // if(_s < 0 || _s==undefined){_s = 0};
-
-    // if(sliderPoints >= dataX.length){ 
-        // sliderPoints = dataX.length; 
-        //console.log("sliderPoints correct to dataX length")
-        // document.getElementById("pointsValue").innerHTML = sliderPoints;
-    // };
-//  if (_e > dataX.length){_e = dataX.length};
-
-
-    // if(zoomStatus){
-        
-        // if (sliderPoints <= dataX.length){
-        //     _length = sliderPoints;
-        //     // _e = dataX.length;
-        //     _s = _e - _length;
-        //     if (_s<0){s=0; _e = sliderPoints};
-        // }else{
-        //     _length = dataX.length;
-        //     _s = 0;
-        //     _e = _length;
-        // }
-
-    // }else{
-    //     if (_s<0){s=0; _e = dataX.length};
-    // }
-
-    // document.getElementById("rangeValue").innerHTML = _e;
-    // gVar.zoom = {_s, _e, zoomStatus}
     gVar.zoom = {s:_s, e:_e, zoomStatus:zoomStatus}
 
     if(debug){console.log(_s, _e, sliderPoints, sliderPercentage)};
@@ -436,7 +397,7 @@ async function wrapper(){
     console.log(iteration);
     button_stop = true;
     console.log('finish');
-};
+    };
 async function wrapperW(){
     console.log('start W');
     // await waitInterval( meter, 999);
@@ -444,7 +405,7 @@ async function wrapperW(){
     console.log(iteration);
     button_stop = true;
     console.log('finish W');
-};
+    };
 
 function toggleZoom(){
     zoomStatus = gVar.zoom.zoomStatus;
@@ -569,30 +530,35 @@ if(min == max){
     if ( un >= 1000){
         max = Math.ceil(max / 5000) * 5000;
         min = Math.floor(min / 5000) * 5000;
+        un = (max - min) / 10;
         un = Math.round(un / 500 ) * 500;          
     // Units of 10, 15, 20 etc
     }else
     if ( un >= 100){
         max = Math.ceil(max / 500) * 500;
         min = Math.floor(min / 500) * 500;
+        un = (max - min) / 10;
         un = Math.round(un / 50 ) * 50;
     // Units of 10, 15, 20 etc
     }else 
     if ( un >= 10){
         max = Math.ceil(max / 50) * 50;
         min = Math.floor(min / 50) * 50;
+        un = (max - min) / 10;
         un = Math.round(un / 10) * 10;
     // Units of 1 2 5    
     }else 
     if ( un >= 1){     
       max = Math.ceil( max / 10) * 10;
       min = Math.floor( min / 10) * 10;
+      un = (max - min) / 10;
       un = (Math.round( un / 1) ) * 1;
     // Units of 0.1 0.2 0.5
     }else 
     if ( un >= 0){      
         max = Math.ceil( max * 1) / 1;
         min = Math.floor( min * 1) / 1;
+        un = (max - min) / 10;
         un = (Math.round( un * 10) ) / 10;
     }
     
