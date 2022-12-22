@@ -596,6 +596,8 @@ if(min == max){
         un = (Math.round( un * 10) ) / 10;
     }
     
+    if (un == 0){ un = 0.1 ; max = 10; min = 0}
+    
 if (debug){console.log(min,max,un)};
 
     return [min,max,un]
@@ -610,6 +612,12 @@ function drawLine(){
         if (zoomStatus){
         _s =  gVar.zoom.s;
         _e =  gVar.zoom.e; 
+        if (sliderPercentage == 1){
+            _e = dataX.length;
+            _s = _e - sliderPoints;
+            if (_s < 0){ _s = 0}
+            gVar.zoom = {s:_s,e:_e, zoomStatus: zoomStatus};
+        }
         zoomStatus = gVar.zoom.zoomStatus;
         }else{
             _s = 0
