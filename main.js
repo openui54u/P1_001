@@ -677,7 +677,8 @@ function drawLine(){
        //gVar.zoomG = {s:_s,e:_e, zoomStatus: zoomStatus};
 
         MMU[1] = getMinMaxUn(datag);
-        min = MMU[1][0];
+        // min = MMU[1][0];
+        MMU[1][0] = min = 0;
         max = MMU[1][1];
         un  = MMU[1][2];  // 1/10 of the axis
   
