@@ -563,7 +563,7 @@ if(min == max){
 }
 // Unit multiple of 1, 10, 2, 20, 5, 50, 100, 200, 500 etc
         un = (max - min) / 10;
-        un = un * 1.22; // give a little more space
+        // un = un * 0.99// give a little more space
 
     // Units of 100,150, 200 and such
     if ( un >= 1000){
@@ -597,7 +597,7 @@ if(min == max){
     }
     
     if (un == 0){ un = 0.1 ; max = 10; min = 0}
-    
+
 if (debug){console.log(min,max,un)};
 
     return [min,max,un]
@@ -616,14 +616,14 @@ function drawLine(){
             _e = dataX.length;
             _s = _e - sliderPoints;
             if (_s < 0){ _s = 0}
-            gVar.zoom = {s:_s,e:_e, zoomStatus: zoomStatus};
+            //gVar.zoom = {s:_s,e:_e, zoomStatus: zoomStatus};
         }
         zoomStatus = gVar.zoom.zoomStatus;
         }else{
             _s = 0
             _e = dataX.length
         }
-     
+      gVar.zoom = {s:_s,e:_e, zoomStatus: zoomStatus};
         _length = _e - _s ;
 
     let A = [ dataL_Total.slice(_s,_e), datal1.slice(_s,_e), datal2.slice(_s,_e), datal3.slice(_s,_e)];           // Combine all arrays
@@ -674,6 +674,7 @@ function drawLine(){
         // _s = gVar.zoom.s
         // _e = gVar.zoom.e
 //    };
+       //gVar.zoomG = {s:_s,e:_e, zoomStatus: zoomStatus};
 
         MMU[1] = getMinMaxUn(datag);
         min = MMU[1][0];
