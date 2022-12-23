@@ -531,35 +531,35 @@ if(min == max){
         max = Math.ceil(max / 5000) * 5000;
         min = Math.floor(min / 5000) * 5000;
         un = (max - min) / 10;
-        un = Math.round(un / 500 ) * 500;          
+        // un = Math.round(un / 500 ) * 500;          
     // Units of 10, 15, 20 etc
     }else
     if ( un >= 100){
         max = Math.ceil(max / 500) * 500;
         min = Math.floor(min / 500) * 500;
         un = (max - min) / 10;
-        un = Math.round(un / 50 ) * 50;
+        // un = Math.round(un / 50 ) * 50;
     // Units of 10, 15, 20 etc
     }else 
     if ( un >= 10){
         max = Math.ceil(max / 50) * 50;
         min = Math.floor(min / 50) * 50;
         un = (max - min) / 10;
-        un = Math.round(un / 10) * 10;
+        // un = Math.round(un / 10) * 10;
     // Units of 1 2 5    
     }else 
     if ( un >= 1){     
       max = Math.ceil( max / 10) * 10;
       min = Math.floor( min / 10) * 10;
       un = (max - min) / 10;
-      un = (Math.round( un / 1) ) * 1;
+    //   un = (Math.round( un / 1) ) * 1;
     // Units of 0.1 0.2 0.5
     }else 
     if ( un >= 0){      
         max = Math.ceil( max * 1) / 1;
         min = Math.floor( min * 1) / 1;
         un = (max - min) / 10;
-        un = (Math.round( un * 10) ) / 10;
+        // un = (Math.round( un * 10) ) / 10;
     }
     
     if (un == 0){ un = 0.1 ; max = 10; min = 0}
@@ -1469,6 +1469,14 @@ x += xs ; // Every 5 minutes : should be
             if (_length > 24000){                             // 1h 2h 3h 4h 5h 6h
                     _factor = Math.floor(_length / 3600);
                     if (_factor < 3600){ _factor = 3600};
+            }else 
+            if (_length > 6000){                           // 1m 2m 3m 4m 5m 6m
+                _factor = Math.floor(_length / 1200);
+                if (_factor < 1200){ _factor = 1200};
+            }else 
+            if (_length > 1200){                           // 1m 2m 3m 4m 5m 6m
+                _factor = Math.floor(_length / 240);
+                if (_factor < 240){ _factor = 240};
             }else 
              // Show in minutes 
             if (_length > 300){                           // 1m 2m 3m 4m 5m 6m
